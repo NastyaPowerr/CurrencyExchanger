@@ -36,15 +36,5 @@ public class CurrenciesServlet extends HttpServlet {
         for (CurrencyDto currency : currencies) {
             System.out.println(currency);
         }
-//        String path = req.getPathInfo();
-//
-//        CurrencyDto currency;
-//        List<CurrencyDto> currencies = new ArrayList<>();
-//        if (path == null || path.equals("/")) {
-//            currencies = currencyService.getAll();
-//        } else {
-//            String code = path.substring(1);
-//            currency = currencyService.get(code);
-//        }
     }
 }
