@@ -4,6 +4,10 @@ import org.roadmap.dao.CurrencyDao;
 import org.roadmap.model.CurrencyEntity;
 import org.roadmap.model.dto.CurrencyDto;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class CurrencyService {
     private final CurrencyDao currencyDao;
 
@@ -13,10 +17,27 @@ public class CurrencyService {
 
     public void save(CurrencyDto dto) {
         CurrencyEntity entity = new CurrencyEntity(
-                dto.getName(),
-                dto.getCode(),
-                dto.getSign()
+                dto.name(),
+                dto.code(),
+                dto.sign()
         );
         currencyDao.save(entity);
+    }
+
+    public CurrencyDto get(String code) {
+        CurrencyEntity entity = currencyDao.getByCode(code);
+        CurrencyDto dto = new CurrencyDto(
+                entity.getName(),
+                entity.getCode(),
+                entity.getSign()
+        );
+        return dto;
+    }
+
+    public List<CurrencyDto> getAll() {
+        List<CurrencyEntity> currencies = currencyDao.findAll();
+        return currencies.stream()
+                .map(e -> new CurrencyDto(e.getName(), e.getCode(), e.getSign()))
+                .collect(Collectors.toList());
     }
 }
