@@ -20,11 +20,10 @@ public class CurrencyServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        String code = req.getParameter("code");
-        String name = req.getParameter("name");
-        String sign = req.getParameter("sign");
-        CurrencyDto currency = new CurrencyDto(name, code, sign);
-        currencyService.save(currency);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        String path = req.getPathInfo();
+        String code = path.substring(1);
+        CurrencyDto currency = currencyService.get(code);
+        System.out.println(currency);
     }
 }
