@@ -11,18 +11,22 @@ import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.dto.ExchangeRateDto;
 import org.roadmap.model.dto.ExchangeRateRequest;
 import org.roadmap.service.ExchangeRateService;
+import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/api/exchangeRates/*")
 public class ExchangeRatesServlet extends HttpServlet {
     private final ExchangeRateService exchangeRateService;
+    private final ObjectMapper objectMapper;
 
     public ExchangeRatesServlet() {
         ConnectionManager connectionManager = new ConnectionManager();
         ExchangeRateDao exchangeRateDao = new ExchangeRateDao(connectionManager);
         CurrencyDao currencyDao = new CurrencyDao(connectionManager);
         this.exchangeRateService = new ExchangeRateService(exchangeRateDao, currencyDao);
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -35,19 +39,22 @@ public class ExchangeRatesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+
         String path = req.getPathInfo();
         ExchangeRateResponse response;
         List<ExchangeRateDto> exchangeRates;
+        String jsonResponse;
         if (path == null || path.equals("/")) {
             exchangeRates = exchangeRateService.getAll();
-            for (ExchangeRateDto exchangeRateDto : exchangeRates) {
-                System.out.println(exchangeRateDto);
-            }
+            jsonResponse = objectMapper.writeValueAsString(exchangeRates);
         } else {
             String code = path.substring(1);
             response = exchangeRateService.getByCode(code);
+            jsonResponse = objectMapper.writeValueAsString(response);
             System.out.println(response);
         }
+        resp.getWriter().write(jsonResponse);
     }
 }

@@ -51,8 +51,8 @@ public class ExchangeRateService {
         CurrencyEntity baseCurrency = currencyDao.getByCode(baseCurrencyCode);
         CurrencyEntity targetCurrency = currencyDao.getByCode(targetCurrencyCode);
 
-        CurrencyDto baseCurrencyDto = new CurrencyDto(baseCurrency.getName(), baseCurrency.getCode(), baseCurrency.getCode());
-        CurrencyDto targetCurrencyDto = new CurrencyDto(targetCurrency.getName(), targetCurrency.getCode(), targetCurrency.getCode());
+        CurrencyDto baseCurrencyDto = new CurrencyDto(baseCurrency.getName(), baseCurrency.getCode(), baseCurrency.getSign());
+        CurrencyDto targetCurrencyDto = new CurrencyDto(targetCurrency.getName(), targetCurrency.getCode(), targetCurrency.getSign());
 
         ExchangeRateResponse response = new ExchangeRateResponse(
                 rateEntity.getId(),
