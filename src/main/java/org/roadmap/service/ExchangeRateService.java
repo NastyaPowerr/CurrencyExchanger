@@ -109,4 +109,24 @@ public class ExchangeRateService {
         }
         return exchangeRateResponses;
     }
+
+    public ExchangeRateResponse update(ExchangeRateDto exchangeRate) {
+        String code = exchangeRate.baseCurrencyCode() + exchangeRate.targetCurrencyCode();
+        ExchangeRateResponse oldResponse = getByCode(code);
+
+        ExchangeRateResponse responseToChange = new ExchangeRateResponse(
+                oldResponse.id(),
+                oldResponse.baseCurrency(),
+                oldResponse.targetCurrency(),
+                exchangeRate.rate()
+        );
+
+        ExchangeRateEntity updatedEntity = exchangeRateDao.update(responseToChange);
+        return new ExchangeRateResponse(
+                oldResponse.id(),
+                oldResponse.baseCurrency(),
+                oldResponse.targetCurrency(),
+                updatedEntity.getRate()
+        );
+    }
 }

@@ -1,5 +1,6 @@
 package org.roadmap.servlet;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +35,8 @@ public class ExchangeRatesServlet extends HttpServlet {
 
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
-        double rate = Double.parseDouble((req.getParameter("rate")));
+        Double rate = Double.parseDouble((req.getParameter("rate")));
+
         ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, rate);
         ExchangeRateResponse exchangeRateResponse = exchangeRateService.save(exchangeRate);
 
@@ -59,6 +61,28 @@ public class ExchangeRatesServlet extends HttpServlet {
             jsonResponse = objectMapper.writeValueAsString(response);
             System.out.println(response);
         }
+        resp.getWriter().write(jsonResponse);
+    }
+
+    @Override
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+
+        String path = req.getPathInfo();
+        String code = path.substring(1);
+        String baseCurrencyCode = code.substring(0, 3);
+        String targetCurrencyCode = code.substring(3);
+
+        // doPatch doesn't work correctly with req.getParameter("rate")?
+        // temp solution
+        String rateString = req.getReader().readLine();
+        rateString = rateString.replace("rate=", "");
+        Double rate = Double.parseDouble(rateString);
+
+        ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, rate);
+        ExchangeRateResponse exchangeRateResponse = exchangeRateService.update(exchangeRate);
+
+        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponse);
         resp.getWriter().write(jsonResponse);
     }
 }
