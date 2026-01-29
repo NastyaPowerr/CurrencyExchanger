@@ -9,7 +9,6 @@ import org.roadmap.dao.CurrencyDao;
 import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.dto.ExchangeRateDto;
-import org.roadmap.model.dto.ExchangeRateRequest;
 import org.roadmap.service.ExchangeRateService;
 import tools.jackson.databind.ObjectMapper;
 
@@ -30,12 +29,17 @@ public class ExchangeRatesServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         double rate = Double.parseDouble((req.getParameter("rate")));
-        ExchangeRateRequest exchangeRate = new ExchangeRateRequest(baseCurrencyCode, targetCurrencyCode, rate);
-        exchangeRateService.save(exchangeRate);
+        ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, rate);
+        ExchangeRateResponse exchangeRateResponse = exchangeRateService.save(exchangeRate);
+
+        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponse);
+        resp.getWriter().write(jsonResponse);
     }
 
     @Override
@@ -44,7 +48,7 @@ public class ExchangeRatesServlet extends HttpServlet {
 
         String path = req.getPathInfo();
         ExchangeRateResponse response;
-        List<ExchangeRateDto> exchangeRates;
+        List<ExchangeRateResponse> exchangeRates;
         String jsonResponse;
         if (path == null || path.equals("/")) {
             exchangeRates = exchangeRateService.getAll();

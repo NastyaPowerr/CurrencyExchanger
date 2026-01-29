@@ -1,4 +1,4 @@
 package org.roadmap.model;
 
-public record CodePair(long baseCurrencyId, long targetCurrencyId) {
+public record CodePair(Long baseCurrencyId, Long targetCurrencyId) {
 }

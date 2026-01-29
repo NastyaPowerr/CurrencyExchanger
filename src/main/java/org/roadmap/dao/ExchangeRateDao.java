@@ -2,7 +2,9 @@ package org.roadmap.dao;
 
 import org.roadmap.ConnectionManager;
 import org.roadmap.model.CodePair;
-import org.roadmap.model.ExchangeRateEntity;
+import org.roadmap.model.ExchangeRateResponse;
+import org.roadmap.model.entity.CurrencyEntity;
+import org.roadmap.model.entity.ExchangeRateEntity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,16 +27,30 @@ public class ExchangeRateDao {
         this.connectionManager = connectionManager;
     }
 
-    public void save(ExchangeRateEntity exchangeRate) {
+    public ExchangeRateEntity save(ExchangeRateEntity exchangeRate) {
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_QUERY)) {
             statement.setLong(1, exchangeRate.getBaseCurrencyId());
             statement.setLong(2, exchangeRate.getTargetCurrencyId());
             statement.setDouble(3, exchangeRate.getRate());
             statement.executeUpdate();
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    Long id = generatedKeys.getLong(1);
+                    return new ExchangeRateEntity(
+                            id,
+                            exchangeRate.getBaseCurrencyId(),
+                            exchangeRate.getTargetCurrencyId(),
+                            exchangeRate.getRate()
+                    );
+                }
+            }
+
         } catch (SQLException ex) {
             throw new RuntimeException("Exception in ExchangeRateDao.save()" + ex.getMessage());
         }
+        return null;
     }
 
     public ExchangeRateEntity getByCode(CodePair codePair) {
@@ -44,8 +60,8 @@ public class ExchangeRateDao {
             statement.setLong(2, codePair.targetCurrencyId());
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
-                    long id = result.getLong("id");
-                    double rate = result.getDouble("rate");
+                    Long id = result.getLong("id");
+                    Double rate = result.getDouble("rate");
                     return new ExchangeRateEntity(id, codePair.baseCurrencyId(), codePair.targetCurrencyId(), rate);
                 }
             }
@@ -61,10 +77,10 @@ public class ExchangeRateDao {
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
-                long id = result.getLong("id");
-                long baseCurrencyId = result.getLong("base_currency_id");
-                long targetCurrencyId = result.getLong("target_currency_id");
-                double rate = result.getLong("rate");
+                Long id = result.getLong("id");
+                Long baseCurrencyId = result.getLong("base_currency_id");
+                Long targetCurrencyId = result.getLong("target_currency_id");
+                Double rate = result.getDouble("rate");
                 ExchangeRateEntity exchangeRate = new ExchangeRateEntity(id, baseCurrencyId, targetCurrencyId, rate);
                 exchangeRates.add(exchangeRate);
             }
