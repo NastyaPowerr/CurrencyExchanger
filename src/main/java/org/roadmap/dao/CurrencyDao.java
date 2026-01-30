@@ -1,13 +1,12 @@
 package org.roadmap.dao;
 
-import org.roadmap.ConnectionManager;
+import org.roadmap.util.ConnectionManager;
 import org.roadmap.model.entity.CurrencyEntity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +16,9 @@ public class CurrencyDao {
     private static final String GET_BY_CODE_QUERY = "SELECT * FROM currencies WHERE code = ?";
     private static final String GET_BY_ID = "SELECT * FROM currencies WHERE id = ?";
     private static final String FIND_ALL_QUERY = "SELECT * FROM currencies";
-    private final ConnectionManager connectionManager;
-
-    public CurrencyDao(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
-    }
 
     public CurrencyEntity save(CurrencyEntity currency) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, currency.getCode());
             statement.setString(2, currency.getName());
@@ -44,7 +38,7 @@ public class CurrencyDao {
     }
 
     public CurrencyEntity getByCode(String code) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BY_CODE_QUERY)) {
             statement.setString(1, code);
             try (ResultSet result = statement.executeQuery()) {
@@ -63,7 +57,7 @@ public class CurrencyDao {
 
     public List<CurrencyEntity> findAll() {
         List<CurrencyEntity> currencies = new ArrayList<>();
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
@@ -81,7 +75,7 @@ public class CurrencyDao {
     }
 
     public Long getIdByCode(String code) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BY_CODE_QUERY)) {
             statement.setString(1, code);
             try (ResultSet result = statement.executeQuery()) {
@@ -97,7 +91,7 @@ public class CurrencyDao {
     }
 
     public CurrencyEntity get(Long id) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BY_ID)) {
             statement.setLong(1, id);
             try (ResultSet result = statement.executeQuery()) {

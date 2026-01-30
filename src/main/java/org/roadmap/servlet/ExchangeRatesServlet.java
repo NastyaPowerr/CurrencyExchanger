@@ -1,14 +1,10 @@
 package org.roadmap.servlet;
 
-import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.roadmap.ConnectionManager;
-import org.roadmap.dao.CurrencyDao;
-import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.dto.ExchangeRateDto;
 import org.roadmap.service.ExchangeRateService;
@@ -27,14 +23,6 @@ public class ExchangeRatesServlet extends HttpServlet {
         ServletContext context = getServletContext();
         this.exchangeRateService = (ExchangeRateService) context.getAttribute("exchangeRateService");
         this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
-    }
-
-    public ExchangeRatesServlet() {
-        ConnectionManager connectionManager = new ConnectionManager();
-        ExchangeRateDao exchangeRateDao = new ExchangeRateDao(connectionManager);
-        CurrencyDao currencyDao = new CurrencyDao(connectionManager);
-        this.exchangeRateService = new ExchangeRateService(exchangeRateDao, currencyDao);
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override

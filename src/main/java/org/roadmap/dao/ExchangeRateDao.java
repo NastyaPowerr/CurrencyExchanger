@@ -1,6 +1,6 @@
 package org.roadmap.dao;
 
-import org.roadmap.ConnectionManager;
+import org.roadmap.util.ConnectionManager;
 import org.roadmap.model.CodePair;
 import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.entity.ExchangeRateEntity;
@@ -24,14 +24,9 @@ public class ExchangeRateDao {
     private static final String FIND_BY_ID = """
             SELECT id, base_currency_id, target_currency_id, rate FROM exchangeRates WHERE id = ?
             """;
-    private final ConnectionManager connectionManager;
-
-    public ExchangeRateDao(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
-    }
 
     public ExchangeRateEntity save(ExchangeRateEntity exchangeRate) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_QUERY)) {
             statement.setLong(1, exchangeRate.getBaseCurrencyId());
             statement.setLong(2, exchangeRate.getTargetCurrencyId());
@@ -57,7 +52,7 @@ public class ExchangeRateDao {
     }
 
     public ExchangeRateEntity getByCode(CodePair codePair) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BY_CODE_QUERY)) {
             statement.setLong(1, codePair.baseCurrencyId());
             statement.setLong(2, codePair.targetCurrencyId());
@@ -76,7 +71,7 @@ public class ExchangeRateDao {
 
     public List<ExchangeRateEntity> findAll() {
         List<ExchangeRateEntity> exchangeRates = new ArrayList<>();
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
@@ -94,7 +89,7 @@ public class ExchangeRateDao {
     }
 
     public ExchangeRateEntity update(ExchangeRateResponse exchangeRate) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_QUERY)) {
             statement.setDouble(1, exchangeRate.rate());
             statement.setLong(2, exchangeRate.id());
@@ -107,7 +102,7 @@ public class ExchangeRateDao {
     }
 
     private ExchangeRateEntity findById(Long id) {
-        try (Connection connection = connectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_BY_ID)) {
             statement.setLong(1, id);
             ResultSet result = statement.executeQuery();
