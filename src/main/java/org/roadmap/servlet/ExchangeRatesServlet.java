@@ -1,6 +1,7 @@
 package org.roadmap.servlet;
 
-import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +19,15 @@ import java.util.List;
 
 @WebServlet("/api/exchangeRates/*")
 public class ExchangeRatesServlet extends HttpServlet {
-    private final ExchangeRateService exchangeRateService;
-    private final ObjectMapper objectMapper;
+    private ExchangeRateService exchangeRateService;
+    private ObjectMapper objectMapper;
+
+    @Override
+    public void init() {
+        ServletContext context = getServletContext();
+        this.exchangeRateService = (ExchangeRateService) context.getAttribute("exchangeRateService");
+        this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
+    }
 
     public ExchangeRatesServlet() {
         ConnectionManager connectionManager = new ConnectionManager();

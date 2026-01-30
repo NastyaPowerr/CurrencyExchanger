@@ -1,11 +1,11 @@
 package org.roadmap.servlet;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.roadmap.ConnectionManager;
-import org.roadmap.dao.CurrencyDao;
 import org.roadmap.model.dto.CurrencyDto;
 import org.roadmap.service.CurrencyService;
 import tools.jackson.databind.ObjectMapper;
@@ -14,14 +14,14 @@ import java.io.IOException;
 
 @WebServlet("/api/currency/*")
 public class CurrencyServlet extends HttpServlet {
-    private final CurrencyService currencyService;
-    private final ObjectMapper objectMapper;
+    private CurrencyService currencyService;
+    private ObjectMapper objectMapper;
 
-    public CurrencyServlet() {
-        ConnectionManager connectionManager = new ConnectionManager();
-        CurrencyDao currencyDao = new CurrencyDao(connectionManager);
-        this.currencyService = new CurrencyService(currencyDao);
-        this.objectMapper = new ObjectMapper();
+    @Override
+    public void init() {
+        ServletContext context = getServletContext();
+        this.currencyService = (CurrencyService) context.getAttribute("currencyService");
+        this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
     }
 
     @Override
