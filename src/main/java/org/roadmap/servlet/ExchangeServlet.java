@@ -1,15 +1,16 @@
 package org.roadmap.servlet;
 
-import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.roadmap.exception.ValidationException;
 import org.roadmap.model.ExchangeResponse;
 import org.roadmap.model.dto.ExchangeDto;
 import org.roadmap.service.ExchangeRateService;
+import org.roadmap.validator.CurrencyValidator;
+import org.roadmap.validator.ExchangeRateValidator;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -34,6 +35,16 @@ public class ExchangeServlet extends HttpServlet {
         String from = req.getParameter("from");
         String to = req.getParameter("to");
         BigDecimal amount = BigDecimal.valueOf(Long.parseLong(req.getParameter("amount")));
+
+        try {
+            CurrencyValidator.validateCode(from);
+            CurrencyValidator.validateCode(to);
+            ExchangeRateValidator.validateAmount(amount);
+        } catch (ValidationException ex) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(ex.getMessage());
+            return;
+        }
 
         ExchangeDto exchangeDto = new ExchangeDto(from, to, amount);
         ExchangeResponse response = exchangeRateService.exchange(exchangeDto);

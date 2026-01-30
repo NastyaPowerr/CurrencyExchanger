@@ -1,10 +1,11 @@
 package org.roadmap.dao;
 
-import org.roadmap.util.ConnectionManager;
 import org.roadmap.model.CodePair;
 import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.entity.ExchangeRateEntity;
+import org.roadmap.util.ConnectionManager;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,7 +31,7 @@ public class ExchangeRateDao {
              PreparedStatement statement = connection.prepareStatement(SAVE_QUERY)) {
             statement.setLong(1, exchangeRate.getBaseCurrencyId());
             statement.setLong(2, exchangeRate.getTargetCurrencyId());
-            statement.setDouble(3, exchangeRate.getRate());
+            statement.setBigDecimal(3, exchangeRate.getRate());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -59,7 +60,7 @@ public class ExchangeRateDao {
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
                     Long id = result.getLong("id");
-                    Double rate = result.getDouble("rate");
+                    BigDecimal rate = result.getBigDecimal("rate");
                     return new ExchangeRateEntity(id, codePair.baseCurrencyId(), codePair.targetCurrencyId(), rate);
                 }
             }
@@ -78,7 +79,7 @@ public class ExchangeRateDao {
                 Long id = result.getLong("id");
                 Long baseCurrencyId = result.getLong("base_currency_id");
                 Long targetCurrencyId = result.getLong("target_currency_id");
-                Double rate = result.getDouble("rate");
+                BigDecimal rate = result.getBigDecimal("rate");
                 ExchangeRateEntity exchangeRate = new ExchangeRateEntity(id, baseCurrencyId, targetCurrencyId, rate);
                 exchangeRates.add(exchangeRate);
             }
@@ -91,7 +92,7 @@ public class ExchangeRateDao {
     public ExchangeRateEntity update(ExchangeRateResponse exchangeRate) {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_QUERY)) {
-            statement.setDouble(1, exchangeRate.rate());
+            statement.setBigDecimal(1, exchangeRate.rate());
             statement.setLong(2, exchangeRate.id());
             statement.executeUpdate();
 
@@ -111,7 +112,7 @@ public class ExchangeRateDao {
                         result.getLong("id"),
                         result.getLong("base_currency_id"),
                         result.getLong("target_currency_id"),
-                        result.getDouble("rate")
+                        result.getBigDecimal("rate")
                 );
             }
         } catch (SQLException ex) {
