@@ -4,11 +4,14 @@ import org.roadmap.dao.CurrencyDao;
 import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.model.CodePair;
 import org.roadmap.model.ExchangeRateResponse;
+import org.roadmap.model.ExchangeResponse;
 import org.roadmap.model.dto.CurrencyDto;
+import org.roadmap.model.dto.ExchangeDto;
 import org.roadmap.model.dto.ExchangeRateDto;
 import org.roadmap.model.entity.CurrencyEntity;
 import org.roadmap.model.entity.ExchangeRateEntity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +68,8 @@ public class ExchangeRateService {
         CurrencyEntity baseCurrency = currencyDao.getByCode(baseCurrencyCode);
         CurrencyEntity targetCurrency = currencyDao.getByCode(targetCurrencyCode);
 
-        CurrencyDto baseCurrencyDto = new CurrencyDto(baseCurrency.getName(), baseCurrency.getCode(), baseCurrency.getSign());
-        CurrencyDto targetCurrencyDto = new CurrencyDto(targetCurrency.getName(), targetCurrency.getCode(), targetCurrency.getSign());
+        CurrencyDto baseCurrencyDto = new CurrencyDto(baseCurrency.getId(), baseCurrency.getName(), baseCurrency.getCode(), baseCurrency.getSign());
+        CurrencyDto targetCurrencyDto = new CurrencyDto(targetCurrency.getId(), targetCurrency.getName(), targetCurrency.getCode(), targetCurrency.getSign());
 
         return new ExchangeRateResponse(
                 rateEntity.getId(),
@@ -127,6 +130,24 @@ public class ExchangeRateService {
                 oldResponse.baseCurrency(),
                 oldResponse.targetCurrency(),
                 updatedEntity.getRate()
+        );
+    }
+
+    public ExchangeResponse exchange(ExchangeDto exchangeDto) {
+        String baseCurrencyCode = exchangeDto.baseCurrencyCode();
+        String targetCurrencyCode = exchangeDto.targetCurrencyCode();
+        ExchangeRateResponse entity = getByCode(baseCurrencyCode + targetCurrencyCode);
+        BigDecimal rate = BigDecimal.valueOf(entity.rate());
+        BigDecimal amount = exchangeDto.amount();
+
+        BigDecimal convertedAmount = rate.multiply(amount);
+
+        return new ExchangeResponse(
+                entity.baseCurrency(),
+                entity.targetCurrency(),
+                entity.rate(),
+                amount,
+                convertedAmount
         );
     }
 }
