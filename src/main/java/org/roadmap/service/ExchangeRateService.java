@@ -10,6 +10,7 @@ import org.roadmap.model.dto.ExchangeDto;
 import org.roadmap.model.dto.ExchangeRateDto;
 import org.roadmap.model.entity.CurrencyEntity;
 import org.roadmap.model.entity.ExchangeRateEntity;
+import org.roadmap.model.entity.ExchangeRateResponseEntity;
 import org.roadmap.model.entity.ExchangeRateSaveEntity;
 
 import java.math.BigDecimal;
@@ -18,11 +19,9 @@ import java.util.List;
 
 public class ExchangeRateService {
     private final ExchangeRateDao exchangeRateDao;
-    private final CurrencyDao currencyDao;
 
-    public ExchangeRateService(ExchangeRateDao exchangeRateDao, CurrencyDao currencyDao) {
+    public ExchangeRateService(ExchangeRateDao exchangeRateDao) {
         this.exchangeRateDao = exchangeRateDao;
-        this.currencyDao = currencyDao;
     }
 
     public ExchangeRateResponse save(ExchangeRateDto exchangeRate) {
@@ -38,52 +37,50 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateResponse getByCode(CurrencyCodePair codePair) {
-        ExchangeRateEntity rateEntity = exchangeRateDao.getByCode(codePair);
+        ExchangeRateResponseEntity rateEntity = exchangeRateDao.findByCodes(codePair);
 
-        CurrencyEntity baseCurrency = currencyDao.get(rateEntity.getBaseCurrencyId());
-        CurrencyEntity targetCurrency = currencyDao.get(rateEntity.getTargetCurrencyId());
+        CurrencyEntity baseCurrency = rateEntity.baseCurrency();
+        CurrencyEntity targetCurrency = rateEntity.targetCurrency();
 
         CurrencyDto baseCurrencyDto = new CurrencyDto(baseCurrency.getId(), baseCurrency.getName(), baseCurrency.getCode(), baseCurrency.getSign());
         CurrencyDto targetCurrencyDto = new CurrencyDto(targetCurrency.getId(), targetCurrency.getName(), targetCurrency.getCode(), targetCurrency.getSign());
 
         return new ExchangeRateResponse(
-                rateEntity.getId(),
+                rateEntity.id(),
                 baseCurrencyDto,
                 targetCurrencyDto,
-                rateEntity.getRate()
+                rateEntity.rate()
         );
     }
 
     public List<ExchangeRateResponse> getAll() {
-        List<ExchangeRateEntity> exchangeRates = exchangeRateDao.findAll();
+        List<ExchangeRateResponseEntity> exchangeRates = exchangeRateDao.findAll();
 
         List<ExchangeRateResponse> exchangeRateResponses = new ArrayList<>();
 
-        for (ExchangeRateEntity rateEntity : exchangeRates) {
-            CurrencyEntity baseCurrency = currencyDao.get(rateEntity.getBaseCurrencyId());
-            CurrencyEntity targetCurrency = currencyDao.get(rateEntity.getTargetCurrencyId());
+        for (ExchangeRateResponseEntity rateEntity : exchangeRates) {
+            CurrencyEntity baseCurrency = rateEntity.baseCurrency();
+            CurrencyEntity targetCurrency = rateEntity.targetCurrency();
 
-            if (baseCurrency != null && targetCurrency != null) {
-                CurrencyDto baseDto = new CurrencyDto(
-                        baseCurrency.getId(),
-                        baseCurrency.getCode(),
-                        baseCurrency.getName(),
-                        baseCurrency.getSign()
-                );
-                CurrencyDto targetDto = new CurrencyDto(
-                        targetCurrency.getId(),
-                        targetCurrency.getCode(),
-                        targetCurrency.getName(),
-                        targetCurrency.getSign()
-                );
-                exchangeRateResponses.add(
-                        new ExchangeRateResponse(
-                                rateEntity.getId(),
-                                baseDto,
-                                targetDto,
-                                rateEntity.getRate()
-                        ));
-            }
+            CurrencyDto baseDto = new CurrencyDto(
+                    baseCurrency.getId(),
+                    baseCurrency.getName(),
+                    baseCurrency.getCode(),
+                    baseCurrency.getSign()
+            );
+            CurrencyDto targetDto = new CurrencyDto(
+                    targetCurrency.getId(),
+                    targetCurrency.getName(),
+                    targetCurrency.getCode(),
+                    targetCurrency.getSign()
+            );
+            exchangeRateResponses.add(
+                    new ExchangeRateResponse(
+                            rateEntity.id(),
+                            baseDto,
+                            targetDto,
+                            rateEntity.rate()
+                    ));
         }
         return exchangeRateResponses;
     }

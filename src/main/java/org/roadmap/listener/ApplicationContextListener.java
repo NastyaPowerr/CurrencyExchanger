@@ -18,7 +18,7 @@ public class ApplicationContextListener implements ServletContextListener {
         CurrencyDao currencyDao = new CurrencyDao();
         ExchangeRateDao exchangeRateDao = new ExchangeRateDao();
         CurrencyService currencyService = new CurrencyService(currencyDao);
-        ExchangeRateService exchangeRateService = new ExchangeRateService(exchangeRateDao, currencyDao);
+        ExchangeRateService exchangeRateService = new ExchangeRateService(exchangeRateDao);
 
         ServletContext context = sce.getServletContext();
         context.setAttribute("currencyDao", currencyDao);
