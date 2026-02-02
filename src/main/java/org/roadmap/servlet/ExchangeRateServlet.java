@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.ValidationException;
+import org.roadmap.model.CurrencyCodePair;
 import org.roadmap.model.ExchangeRateResponse;
 import org.roadmap.model.dto.ExchangeRateDto;
 import org.roadmap.service.ExchangeRateService;
@@ -46,7 +47,8 @@ public class ExchangeRateServlet extends HttpServlet {
             resp.getWriter().write(ex.getMessage());
             return;
         }
-        ExchangeRateResponse response = exchangeRateService.getByCode(code);
+        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
+        ExchangeRateResponse response = exchangeRateService.getByCode(codePair);
         String jsonResponse = objectMapper.writeValueAsString(response);
         resp.getWriter().write(jsonResponse);
     }

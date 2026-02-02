@@ -51,6 +51,7 @@ public class ExchangeRatesServlet extends HttpServlet {
         ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
         ExchangeRateResponse exchangeRateResponse = exchangeRateService.save(exchangeRate);
 
+
         String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponse);
         resp.getWriter().write(jsonResponse);
     }
