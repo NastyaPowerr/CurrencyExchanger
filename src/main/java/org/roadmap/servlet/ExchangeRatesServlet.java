@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.ExchangeRateResponse;
-import org.roadmap.model.dto.ExchangeRateDto;
+import org.roadmap.model.dto.response.ExchangeRateResponseDto;
+import org.roadmap.model.dto.request.ExchangeRateRequestDto;
 import org.roadmap.service.ExchangeRateService;
 import org.roadmap.validator.CurrencyValidator;
 import org.roadmap.validator.ExchangeRateValidator;
@@ -48,11 +48,11 @@ public class ExchangeRatesServlet extends HttpServlet {
             resp.getWriter().write(ex.getMessage());
             return;
         }
-        ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
-        ExchangeRateResponse exchangeRateResponse = exchangeRateService.save(exchangeRate);
+        ExchangeRateRequestDto exchangeRate = new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
+        ExchangeRateResponseDto exchangeRateResponseDto = exchangeRateService.save(exchangeRate);
 
 
-        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponse);
+        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponseDto);
         resp.getWriter().write(jsonResponse);
     }
 
@@ -62,7 +62,7 @@ public class ExchangeRatesServlet extends HttpServlet {
 
         String path = req.getPathInfo();
         if (path == null || path.equals("/")) {
-            List<ExchangeRateResponse> exchangeRates = exchangeRateService.getAll();
+            List<ExchangeRateResponseDto> exchangeRates = exchangeRateService.getAll();
             String jsonResponse = objectMapper.writeValueAsString(exchangeRates);
             resp.getWriter().write(jsonResponse);
         }

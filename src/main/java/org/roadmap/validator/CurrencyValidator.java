@@ -1,7 +1,7 @@
 package org.roadmap.validator;
 
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.dto.CurrencyDto;
+import org.roadmap.model.dto.request.CurrencyRequestDto;
 
 public final class CurrencyValidator {
     private static final int MIN_NAME_LENGTH = 2;
@@ -15,16 +15,16 @@ public final class CurrencyValidator {
     private static final String INVALID_SIGN_LENGTH_MESSAGE = "Currency sign must be exactly 1 character.";
     private static final String INVALID_NAME_LENGTH_MESSAGE =
             "Currency name must be between %d and %d letters.".formatted(
-            MIN_NAME_LENGTH, MAX_NAME_LENGTH
-    );
+                    MIN_NAME_LENGTH, MAX_NAME_LENGTH
+            );
 
     private CurrencyValidator() {
     }
 
-    public static void validate(CurrencyDto currency) {
-        validateName(currency.getName());
-        validateCode(currency.getCode());
-        validateSign(currency.getSign());
+    public static void validate(CurrencyRequestDto currency) {
+        validateName(currency.name());
+        validateCode(currency.code());
+        validateSign(currency.sign());
     }
 
     public static void validateCode(String code) {

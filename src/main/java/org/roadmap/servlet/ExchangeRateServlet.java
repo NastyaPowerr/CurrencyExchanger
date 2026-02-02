@@ -1,15 +1,14 @@
 package org.roadmap.servlet;
 
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.CurrencyCodePair;
-import org.roadmap.model.ExchangeRateResponse;
-import org.roadmap.model.dto.ExchangeRateDto;
+import org.roadmap.model.entity.CurrencyCodePair;
+import org.roadmap.model.dto.response.ExchangeRateResponseDto;
+import org.roadmap.model.dto.request.ExchangeRateRequestDto;
 import org.roadmap.service.ExchangeRateService;
 import org.roadmap.validator.CurrencyValidator;
 import org.roadmap.validator.ExchangeRateValidator;
@@ -48,7 +47,7 @@ public class ExchangeRateServlet extends HttpServlet {
             return;
         }
         CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
-        ExchangeRateResponse response = exchangeRateService.getByCode(codePair);
+        ExchangeRateResponseDto response = exchangeRateService.getByCode(codePair);
         String jsonResponse = objectMapper.writeValueAsString(response);
         resp.getWriter().write(jsonResponse);
     }
@@ -62,8 +61,6 @@ public class ExchangeRateServlet extends HttpServlet {
         String baseCurrencyCode = code.substring(0, 3);
         String targetCurrencyCode = code.substring(3);
 
-        // doPatch doesn't work correctly with req.getParameter("rate")?
-        // temp solution
         String rateString = req.getReader().readLine();
         rateString = rateString.replace("rate=", "");
         Double rate = Double.parseDouble(rateString);
@@ -79,10 +76,10 @@ public class ExchangeRateServlet extends HttpServlet {
             return;
         }
 
-        ExchangeRateDto exchangeRate = new ExchangeRateDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
-        ExchangeRateResponse exchangeRateResponse = exchangeRateService.update(exchangeRate);
+        ExchangeRateRequestDto exchangeRate = new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
+        ExchangeRateResponseDto exchangeRateResponseDto = exchangeRateService.update(exchangeRate);
 
-        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponse);
+        String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponseDto);
         resp.getWriter().write(jsonResponse);
     }
 }

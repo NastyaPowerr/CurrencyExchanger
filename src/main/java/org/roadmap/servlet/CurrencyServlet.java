@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.dto.CurrencyDto;
+import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.service.CurrencyService;
 import org.roadmap.validator.CurrencyValidator;
 import tools.jackson.databind.ObjectMapper;
@@ -39,7 +39,7 @@ public class CurrencyServlet extends HttpServlet {
             return;
         }
 
-        CurrencyDto currency = currencyService.get(code);
+        CurrencyResponseDto currency = currencyService.get(code);
 
         String jsonResponse = objectMapper.writeValueAsString(currency);
         resp.getWriter().write(jsonResponse);

@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.ExchangeResponse;
-import org.roadmap.model.dto.ExchangeDto;
+import org.roadmap.model.dto.response.ExchangeResponseDto;
+import org.roadmap.model.dto.request.ExchangeRequestDto;
 import org.roadmap.service.ExchangeRateService;
 import org.roadmap.validator.CurrencyValidator;
 import org.roadmap.validator.ExchangeRateValidator;
@@ -46,8 +46,8 @@ public class ExchangeServlet extends HttpServlet {
             return;
         }
 
-        ExchangeDto exchangeDto = new ExchangeDto(from, to, amount);
-        ExchangeResponse response = exchangeRateService.exchange(exchangeDto);
+        ExchangeRequestDto exchangeRequestDto = new ExchangeRequestDto(from, to, amount);
+        ExchangeResponseDto response = exchangeRateService.exchange(exchangeRequestDto);
 
         String jsonResponse = objectMapper.writeValueAsString(response);
         resp.getWriter().write(jsonResponse);
