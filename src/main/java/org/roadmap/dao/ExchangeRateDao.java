@@ -1,9 +1,11 @@
 package org.roadmap.dao;
 
+import org.roadmap.exception.DatabaseException;
+import org.roadmap.exception.EntityAlreadyExists;
 import org.roadmap.model.entity.CurrencyCodePair;
-import org.roadmap.model.entity.ExchangeRateUpdateEntity;
 import org.roadmap.model.entity.CurrencyEntity;
 import org.roadmap.model.entity.ExchangeRateEntity;
+import org.roadmap.model.entity.ExchangeRateUpdateEntity;
 import org.roadmap.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -12,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ExchangeRateDao {
     private static final String SAVE_WITH_CODES_QUERY = """
@@ -36,18 +39,29 @@ public class ExchangeRateDao {
              AND target_currency_id = (SELECT id FROM currencies WHERE code = ?)
             """;
     private static final String FIND_BY_CURRENCY_CODES = FIND_ALL_QUERY + "WHERE base.code = ? AND target.code = ?";
+    // вынести
+    private static final int CONSTRAINT_UNIQUE_ERROR = 19;
+    private static final String CURRENCY_EXISTS_QUERY = "SELECT 1 FROM currencies WHERE code = ?";
 
     public void save(ExchangeRateUpdateEntity exchangeRate) {
+        int rowsInserted = 0;
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
             statement.setString(1, exchangeRate.baseCurrencyCode());
             statement.setString(2, exchangeRate.targetCurrencyCode());
             statement.setBigDecimal(3, exchangeRate.rate());
-
-            statement.executeUpdate();
-        } catch (
-                SQLException ex) {
-            throw new RuntimeException("Exception in ExchangeRateDao.save()" + ex.getMessage());
+            rowsInserted = statement.executeUpdate();
+        } catch (SQLException ex) {
+            if (rowsInserted == 0) {
+                checkCurrencyExists(exchangeRate.baseCurrencyCode());
+                checkCurrencyExists(exchangeRate.targetCurrencyCode());
+            }
+            if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
+                throw new EntityAlreadyExists("Exchange rate with code pair %s, %s already exists.".formatted(
+                        exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
+            } else {
+                throw new DatabaseException();
+            }
         }
     }
 
@@ -57,32 +71,36 @@ public class ExchangeRateDao {
             statement.setString(1, codePair.baseCurrencyCode());
             statement.setString(2, codePair.targetCurrencyCode());
 
-            try (ResultSet result = statement.executeQuery()) {
-                if (result.next()) {
-                    CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
-                            result.getLong("base_id"),
-                            result.getString("base_name"),
-                            result.getString("base_code"),
-                            result.getString("base_sign")
-                    );
-                    CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
-                            result.getLong("target_id"),
-                            result.getString("target_name"),
-                            result.getString("target_code"),
-                            result.getString("target_sign")
-                    );
-                    return new ExchangeRateEntity(
-                            result.getLong("exchange_id"),
-                            baseCurrencyEntity,
-                            targetCurrencyEntity,
-                            result.getBigDecimal("exchange_rate")
-                    );
-                }
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
+                        result.getLong("base_id"),
+                        result.getString("base_name"),
+                        result.getString("base_code"),
+                        result.getString("base_sign")
+                );
+                CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
+                        result.getLong("target_id"),
+                        result.getString("target_name"),
+                        result.getString("target_code"),
+                        result.getString("target_sign")
+                );
+                return new ExchangeRateEntity(
+                        result.getLong("exchange_id"),
+                        baseCurrencyEntity,
+                        targetCurrencyEntity,
+                        result.getBigDecimal("exchange_rate")
+                );
+            } else {
+                checkCurrencyExists(codePair.baseCurrencyCode());
+                checkCurrencyExists(codePair.targetCurrencyCode());
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Exception in ExchangeRateDao.getByCode()" + ex.getMessage());
+            throw new DatabaseException();
         }
-        return null;
+        throw new NoSuchElementException("Exchange rate with code pair %s, %s not found.".formatted(
+                codePair.baseCurrencyCode(), codePair.targetCurrencyCode()
+        ));
     }
 
     public List<ExchangeRateEntity> findAll() {
@@ -112,7 +130,7 @@ public class ExchangeRateDao {
                 exchangeRates.add(exchangeRate);
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Exception in ExchangeRateDao.findAll()" + ex.getMessage());
+            throw new DatabaseException();
         }
         return exchangeRates;
     }
@@ -124,10 +142,27 @@ public class ExchangeRateDao {
             statement.setString(2, exchangeRate.baseCurrencyCode());
             statement.setString(3, exchangeRate.targetCurrencyCode());
 
-            statement.executeUpdate();
-
+            int rowsUpdated = statement.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new NoSuchElementException("Exchange rate with pair code %s, %s not found.".formatted(
+                        exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode())
+                );
+            }
         } catch (SQLException ex) {
-            throw new RuntimeException("Exception in updateRate(): " + ex.getMessage(), ex);
+            throw new DatabaseException();
+        }
+    }
+
+    private void checkCurrencyExists(String code) {
+        try (Connection connection = ConnectionManagerUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(CURRENCY_EXISTS_QUERY)) {
+            statement.setString(1, code);
+            ResultSet result = statement.executeQuery();
+            if (!result.next()) {
+                throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
+            }
+        } catch (SQLException ex) {
+            throw new DatabaseException();
         }
     }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.roadmap.exception.DatabaseException;
 import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.service.CurrencyService;
@@ -12,6 +13,7 @@ import org.roadmap.validator.CurrencyValidator;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @WebServlet("/api/currency/*")
 public class CurrencyServlet extends HttpServlet {
@@ -39,9 +41,17 @@ public class CurrencyServlet extends HttpServlet {
             return;
         }
 
-        CurrencyResponseDto currency = currencyService.get(code);
+        try {
+            CurrencyResponseDto currency = currencyService.get(code);
 
-        String jsonResponse = objectMapper.writeValueAsString(currency);
-        resp.getWriter().write(jsonResponse);
+            String jsonResponse = objectMapper.writeValueAsString(currency);
+            resp.getWriter().write(jsonResponse);
+        } catch (NoSuchElementException ex) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().write(ex.getMessage());
+        } catch (DatabaseException ex) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write(ex.getMessage());
+        }
     }
 }
