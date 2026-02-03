@@ -11,8 +11,8 @@ import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.request.CurrencyRequestDto;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.service.CurrencyService;
-import org.roadmap.validator.CurrencyValidator;
-import tools.jackson.databind.ObjectMapper;
+import org.roadmap.util.CurrencyValidatorUtil;
+import org.roadmap.util.ServletResponseUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,51 +20,48 @@ import java.util.List;
 @WebServlet("/api/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
     private CurrencyService currencyService;
-    private ObjectMapper objectMapper;
 
     @Override
     public void init() {
         ServletContext context = getServletContext();
         this.currencyService = (CurrencyService) context.getAttribute("currencyService");
-        this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-
-        String code = req.getParameter("code");
-        String name = req.getParameter("name");
-        String sign = req.getParameter("sign");
-        CurrencyRequestDto requestCurrency = new CurrencyRequestDto(name, code, sign);
-
         try {
-            CurrencyValidator.validate(requestCurrency);
-        } catch (ValidationException ex) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write(ex.getMessage());
-            return;
-        }
-        try {
+            CurrencyRequestDto requestCurrency = extractAndValidateDto(req);
             CurrencyResponseDto responseCurrency = currencyService.save(requestCurrency);
 
-            String jsonResponse = objectMapper.writeValueAsString(responseCurrency);
-            resp.getWriter().write(jsonResponse);
+            ServletResponseUtil.sendSuccessResponse(resp, responseCurrency);
+        } catch (ValidationException ex) {
+            ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (EntityAlreadyExists ex) {
-            resp.setStatus(HttpServletResponse.SC_CONFLICT);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 409, ex.getMessage());
         } catch (DatabaseException ex) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
+        try {
+            List<CurrencyResponseDto> currencies = currencyService.getAll();
+            ServletResponseUtil.sendSuccessResponse(resp, currencies);
+        } catch (DatabaseException ex) {
+            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+        }
+    }
 
-        List<CurrencyResponseDto> currencies = currencyService.getAll();
-        String jsonResponse = objectMapper.writeValueAsString(currencies);
-        resp.getWriter().write(jsonResponse);
+    private static CurrencyRequestDto extractAndValidateDto(HttpServletRequest req) {
+        String code = req.getParameter("code");
+        String name = req.getParameter("name");
+        String sign = req.getParameter("sign");
+
+        CurrencyValidatorUtil.validateCode(code);
+        CurrencyValidatorUtil.validateName(name);
+        CurrencyValidatorUtil.validateSign(sign);
+
+        return new CurrencyRequestDto(name, code, sign);
     }
 }

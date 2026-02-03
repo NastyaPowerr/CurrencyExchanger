@@ -8,6 +8,7 @@ import org.roadmap.dao.CurrencyDao;
 import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.service.CurrencyService;
 import org.roadmap.service.ExchangeRateService;
+import org.roadmap.util.ServletResponseUtil;
 import tools.jackson.databind.ObjectMapper;
 
 @WebListener
@@ -26,6 +27,8 @@ public class ApplicationContextListener implements ServletContextListener {
         context.setAttribute("currencyService", currencyService);
         context.setAttribute("exchangeRateService", exchangeRateService);
         context.setAttribute("objectMapper", objectMapper);
+
+        ServletResponseUtil.init(objectMapper);
 
         System.out.println("AppContextInitialized");
     }

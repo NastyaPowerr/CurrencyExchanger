@@ -8,12 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.DatabaseException;
 import org.roadmap.exception.EntityAlreadyExists;
 import org.roadmap.exception.ValidationException;
-import org.roadmap.model.dto.response.ExchangeRateResponseDto;
 import org.roadmap.model.dto.request.ExchangeRateRequestDto;
+import org.roadmap.model.dto.response.ExchangeRateResponseDto;
+import org.roadmap.model.entity.CurrencyCodePair;
 import org.roadmap.service.ExchangeRateService;
-import org.roadmap.validator.CurrencyValidator;
-import org.roadmap.validator.ExchangeRateValidator;
-import tools.jackson.databind.ObjectMapper;
+import org.roadmap.util.ExchangeRateValidatorUtil;
+import org.roadmap.util.ServletResponseUtil;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,67 +23,51 @@ import java.util.NoSuchElementException;
 @WebServlet("/api/exchangeRates/*")
 public class ExchangeRatesServlet extends HttpServlet {
     private ExchangeRateService exchangeRateService;
-    private ObjectMapper objectMapper;
 
     @Override
     public void init() {
         ServletContext context = getServletContext();
         this.exchangeRateService = (ExchangeRateService) context.getAttribute("exchangeRateService");
-        this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-
-        String baseCurrencyCode = req.getParameter("baseCurrencyCode");
-        String targetCurrencyCode = req.getParameter("targetCurrencyCode");
-
-        Double rate = Double.parseDouble((req.getParameter("rate")));
-        BigDecimal bigDecimalRate = BigDecimal.valueOf(rate);
         try {
-            CurrencyValidator.validateCode(baseCurrencyCode);
-            CurrencyValidator.validateCode(targetCurrencyCode);
-            //TODO: method for parsing String rate -> BigDecimalRate
-            ExchangeRateValidator.validateRate(bigDecimalRate);
-        } catch (ValidationException ex) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write(ex.getMessage());
-            return;
-        }
-        ExchangeRateRequestDto exchangeRate = new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
-
-        try {
+            ExchangeRateRequestDto exchangeRate = extractAndValidateExchangeRateRequest(req);
             ExchangeRateResponseDto exchangeRateResponseDto = exchangeRateService.save(exchangeRate);
-            String jsonResponse = objectMapper.writeValueAsString(exchangeRateResponseDto);
-            resp.getWriter().write(jsonResponse);
+
+            ServletResponseUtil.sendSuccessResponse(resp, exchangeRateResponseDto);
+        } catch (ValidationException ex) {
+            ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 404, ex.getMessage());
         } catch (EntityAlreadyExists ex) {
-            resp.setStatus(HttpServletResponse.SC_CONFLICT);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 409, ex.getMessage());
         } catch (DatabaseException ex) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-
-        String path = req.getPathInfo();
-        if (path == null || path.equals("/")) {
-            try {
-                List<ExchangeRateResponseDto> exchangeRates = exchangeRateService.getAll();
-                String jsonResponse = objectMapper.writeValueAsString(exchangeRates);
-                resp.getWriter().write(jsonResponse);
-            } catch (DatabaseException ex) {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                resp.getWriter().write(ex.getMessage());
-            }
-
+        try {
+            List<ExchangeRateResponseDto> exchangeRates = exchangeRateService.getAll();
+            ServletResponseUtil.sendSuccessResponse(resp, exchangeRates);
+        } catch (DatabaseException ex) {
+            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
         }
+    }
+
+    private static ExchangeRateRequestDto extractAndValidateExchangeRateRequest(HttpServletRequest req) {
+        String baseCurrencyCode = req.getParameter("baseCurrencyCode");
+        String targetCurrencyCode = req.getParameter("targetCurrencyCode");
+        String rate = req.getParameter("rate");
+
+        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
+        ExchangeRateValidatorUtil.validateCodePair(codePair);
+        ExchangeRateValidatorUtil.validateRate(rate);
+
+        BigDecimal bigDecimalRate = new BigDecimal(rate);
+        return new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
     }
 }

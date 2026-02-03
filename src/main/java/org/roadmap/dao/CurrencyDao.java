@@ -75,7 +75,7 @@ public class CurrencyDao {
                 currencies.add(currencyEntity);
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Exception in CurrencyDao.findAll()" + ex.getMessage());
+            throw new DatabaseException();
         }
         return currencies;
     }

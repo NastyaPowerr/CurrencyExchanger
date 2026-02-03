@@ -9,8 +9,8 @@ import org.roadmap.exception.DatabaseException;
 import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.service.CurrencyService;
-import org.roadmap.validator.CurrencyValidator;
-import tools.jackson.databind.ObjectMapper;
+import org.roadmap.util.CurrencyValidatorUtil;
+import org.roadmap.util.ServletResponseUtil;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -18,40 +18,33 @@ import java.util.NoSuchElementException;
 @WebServlet("/api/currency/*")
 public class CurrencyServlet extends HttpServlet {
     private CurrencyService currencyService;
-    private ObjectMapper objectMapper;
 
     @Override
     public void init() {
         ServletContext context = getServletContext();
         this.currencyService = (CurrencyService) context.getAttribute("currencyService");
-        this.objectMapper = (ObjectMapper) context.getAttribute("objectMapper");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-
-        String path = req.getPathInfo();
-        String code = path.substring(1);
         try {
-            CurrencyValidator.validateCode(code);
-        } catch (ValidationException ex) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write(ex.getMessage());
-            return;
-        }
-
-        try {
+            String code = extractAndValidateCode(req);
             CurrencyResponseDto currency = currencyService.get(code);
 
-            String jsonResponse = objectMapper.writeValueAsString(currency);
-            resp.getWriter().write(jsonResponse);
+            ServletResponseUtil.sendSuccessResponse(resp, currency);
+        } catch (ValidationException ex) {
+            ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 404, ex.getMessage());
         } catch (DatabaseException ex) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write(ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
         }
+    }
+
+    private static String extractAndValidateCode(HttpServletRequest req) {
+        String path = req.getPathInfo();
+        String code = path.substring(1);
+        CurrencyValidatorUtil.validateCode(code);
+        return code;
     }
 }
