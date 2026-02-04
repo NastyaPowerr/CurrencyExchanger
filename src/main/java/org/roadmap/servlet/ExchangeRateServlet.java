@@ -77,8 +77,9 @@ public class ExchangeRateServlet extends HttpServlet {
 
         String baseCurrencyCode = code.substring(0, 3);
         String targetCurrencyCode = code.substring(3);
-        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
+
+        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode.toUpperCase(), targetCurrencyCode.toUpperCase());
         ExchangeRateValidatorUtil.validateCodePair(codePair);
-        return new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
+        return codePair;
     }
 }

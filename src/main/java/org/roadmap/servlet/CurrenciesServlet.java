@@ -54,7 +54,7 @@ public class CurrenciesServlet extends HttpServlet {
     }
 
     private static CurrencyRequestDto extractAndValidateDto(HttpServletRequest req) {
-        String code = req.getParameter("code");
+        String code = req.getParameter("code").toUpperCase();
         String name = req.getParameter("name");
         String sign = req.getParameter("sign");
 

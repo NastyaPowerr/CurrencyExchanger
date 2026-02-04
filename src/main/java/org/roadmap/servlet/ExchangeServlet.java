@@ -49,11 +49,11 @@ public class ExchangeServlet extends HttpServlet {
         String toCode = req.getParameter("to");
         String amount = req.getParameter("amount");
 
-        CurrencyValidatorUtil.validateCode(fromCode);
-        CurrencyValidatorUtil.validateCode(toCode);
+        CurrencyValidatorUtil.validateCode(fromCode.toUpperCase());
+        CurrencyValidatorUtil.validateCode(toCode.toUpperCase());
         ExchangeRateValidatorUtil.validateAmount(amount);
 
         BigDecimal bigDecimalAmount = new BigDecimal(amount);
-        return new ExchangeRequestDto(fromCode, toCode, bigDecimalAmount);
+        return new ExchangeRequestDto(fromCode.toUpperCase(), toCode.toUpperCase(), bigDecimalAmount);
     }
 }

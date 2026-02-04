@@ -63,11 +63,11 @@ public class ExchangeRatesServlet extends HttpServlet {
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         String rate = req.getParameter("rate");
 
-        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode, targetCurrencyCode);
+        CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode.toUpperCase(), targetCurrencyCode.toUpperCase());
         ExchangeRateValidatorUtil.validateCodePair(codePair);
         ExchangeRateValidatorUtil.validateRate(rate);
 
         BigDecimal bigDecimalRate = new BigDecimal(rate);
-        return new ExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, bigDecimalRate);
+        return new ExchangeRateRequestDto(codePair.baseCurrencyCode(), codePair.targetCurrencyCode(), bigDecimalRate);
     }
 }
