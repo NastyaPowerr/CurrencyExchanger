@@ -1,7 +1,7 @@
 package org.roadmap.dao;
 
 import org.roadmap.exception.DatabaseException;
-import org.roadmap.exception.EntityAlreadyExists;
+import org.roadmap.exception.EntityAlreadyExistsException;
 import org.roadmap.model.entity.CurrencyEntity;
 import org.roadmap.util.ConnectionManagerUtil;
 
@@ -28,17 +28,19 @@ public class CurrencyDao {
             statement.setString(3, currencyEntity.sign());
             statement.executeUpdate();
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                Long id = generatedKeys.getLong(1);
-                return new CurrencyEntity(id, currencyEntity.name(), currencyEntity.code(), currencyEntity.sign());
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    Long id = generatedKeys.getLong(1);
+                    return new CurrencyEntity(id, currencyEntity.name(), currencyEntity.code(), currencyEntity.sign());
+                }
+                throw new DatabaseException("Failed to fetch generated id after save operation.");
             }
         } catch (SQLException ex) {
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
-                throw new EntityAlreadyExists("Currency with code %s already exists.".formatted(currencyEntity.code()));
+                throw new EntityAlreadyExistsException("Currency with code %s already exists.".formatted(currencyEntity.code()));
             }
+            throw new DatabaseException("Failed during save operation.", ex);
         }
-        throw new DatabaseException();
     }
 
     public CurrencyEntity getByCode(String code) {
@@ -46,15 +48,16 @@ public class CurrencyDao {
              PreparedStatement statement = connection.prepareStatement(GET_BY_CODE_QUERY)) {
             statement.setString(1, code);
 
-            ResultSet result = statement.executeQuery();
-            if (result.next()) {
-                Long id = result.getLong("id");
-                String name = result.getString("full_name");
-                String sign = result.getString("sign");
-                return new CurrencyEntity(id, code, name, sign);
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    Long id = result.getLong("id");
+                    String name = result.getString("full_name");
+                    String sign = result.getString("sign");
+                    return new CurrencyEntity(id, name, code, sign);
+                }
             }
         } catch (SQLException ex) {
-            throw new DatabaseException();
+            throw new DatabaseException("Failed to fetch currency by code %s.".formatted(code), ex);
         }
         throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
     }
@@ -69,12 +72,11 @@ public class CurrencyDao {
                 String code = result.getString("code");
                 String name = result.getString("full_name");
                 String sign = result.getString("sign");
-                CurrencyEntity currencyEntity = new CurrencyEntity(id, name, code, sign);
-                currencies.add(currencyEntity);
+                currencies.add(new CurrencyEntity(id, name, code, sign));
             }
+            return currencies;
         } catch (SQLException ex) {
-            throw new DatabaseException();
+            throw new DatabaseException("Failed to fetch all currencies.", ex);
         }
-        return currencies;
     }
 }
