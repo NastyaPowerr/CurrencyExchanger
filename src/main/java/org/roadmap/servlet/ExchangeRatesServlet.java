@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.exception.DatabaseException;
-import org.roadmap.exception.EntityAlreadyExists;
+import org.roadmap.exception.EntityAlreadyExistsException;
 import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.request.ExchangeRateRequestDto;
 import org.roadmap.model.dto.response.ExchangeRateResponseDto;
@@ -41,7 +41,7 @@ public class ExchangeRatesServlet extends HttpServlet {
             ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 404, ex.getMessage());
-        } catch (EntityAlreadyExists ex) {
+        } catch (EntityAlreadyExistsException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 409, ex.getMessage());
         } catch (DatabaseException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
