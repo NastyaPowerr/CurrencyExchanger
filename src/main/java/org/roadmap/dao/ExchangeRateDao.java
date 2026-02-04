@@ -73,24 +73,7 @@ public class ExchangeRateDao {
 
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
-                    CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
-                            result.getLong("base_id"),
-                            result.getString("base_name"),
-                            result.getString("base_code"),
-                            result.getString("base_sign")
-                    );
-                    CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
-                            result.getLong("target_id"),
-                            result.getString("target_name"),
-                            result.getString("target_code"),
-                            result.getString("target_sign")
-                    );
-                    return new ExchangeRateEntity(
-                            result.getLong("exchange_id"),
-                            baseCurrencyEntity,
-                            targetCurrencyEntity,
-                            result.getBigDecimal("exchange_rate")
-                    );
+                    return mapToExchangeRate(result);
                 } else {
                     checkCurrencyExists(codePair.baseCurrencyCode());
                     checkCurrencyExists(codePair.targetCurrencyCode());
@@ -100,7 +83,7 @@ public class ExchangeRateDao {
             throw new DatabaseException(
                     "Failed to fetch exchange rate with code pair %s, %s."
                             .formatted(codePair.baseCurrencyCode(), codePair.targetCurrencyCode()),
-                            ex
+                    ex
             );
         }
         throw new NoSuchElementException("Exchange rate with code pair %s, %s not found.".formatted(
@@ -114,25 +97,7 @@ public class ExchangeRateDao {
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
-                CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
-                        result.getLong("base_id"),
-                        result.getString("base_name"),
-                        result.getString("base_code"),
-                        result.getString("base_sign")
-                );
-                CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
-                        result.getLong("target_id"),
-                        result.getString("target_name"),
-                        result.getString("target_code"),
-                        result.getString("target_sign")
-                );
-                ExchangeRateEntity exchangeRate = new ExchangeRateEntity(
-                        result.getLong("exchange_id"),
-                        baseCurrencyEntity,
-                        targetCurrencyEntity,
-                        result.getBigDecimal("exchange_rate")
-                );
-                exchangeRates.add(exchangeRate);
+                exchangeRates.add(mapToExchangeRate(result));
             }
         } catch (SQLException ex) {
             throw new DatabaseException("Failed to fetch all exchange rates." + ex);
@@ -169,5 +134,26 @@ public class ExchangeRateDao {
         } catch (SQLException ex) {
             throw new DatabaseException("Failed to check existence of currency with code %s".formatted(code) + ex);
         }
+    }
+
+    private ExchangeRateEntity mapToExchangeRate(ResultSet result) throws SQLException {
+        CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
+                result.getLong("base_id"),
+                result.getString("base_name"),
+                result.getString("base_code"),
+                result.getString("base_sign")
+        );
+        CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
+                result.getLong("target_id"),
+                result.getString("target_name"),
+                result.getString("target_code"),
+                result.getString("target_sign")
+        );
+        return new ExchangeRateEntity(
+                result.getLong("exchange_id"),
+                baseCurrencyEntity,
+                targetCurrencyEntity,
+                result.getBigDecimal("exchange_rate")
+        );
     }
 }

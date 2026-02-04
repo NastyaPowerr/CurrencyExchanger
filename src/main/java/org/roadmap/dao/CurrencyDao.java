@@ -50,10 +50,7 @@ public class CurrencyDao {
 
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
-                    Long id = result.getLong("id");
-                    String name = result.getString("full_name");
-                    String sign = result.getString("sign");
-                    return new CurrencyEntity(id, name, code, sign);
+                    return mapToCurrency(result);
                 }
             }
         } catch (SQLException ex) {
@@ -68,15 +65,19 @@ public class CurrencyDao {
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
-                Long id = result.getLong("id");
-                String code = result.getString("code");
-                String name = result.getString("full_name");
-                String sign = result.getString("sign");
-                currencies.add(new CurrencyEntity(id, name, code, sign));
+                currencies.add(mapToCurrency(result));
             }
             return currencies;
         } catch (SQLException ex) {
             throw new DatabaseException("Failed to fetch all currencies.", ex);
         }
+    }
+
+    public CurrencyEntity mapToCurrency(ResultSet result) throws SQLException {
+        Long id = result.getLong("id");
+        String code = result.getString("code");
+        String name = result.getString("full_name");
+        String sign = result.getString("sign");
+        return new CurrencyEntity(id, name, code, sign);
     }
 }
