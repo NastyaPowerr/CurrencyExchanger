@@ -1,6 +1,6 @@
 package org.roadmap.service;
 
-import org.roadmap.dao.ExchangeRateDao;
+import org.roadmap.dao.JdbcExchangeRateDao;
 import org.roadmap.model.entity.CurrencyCodePair;
 import org.roadmap.model.entity.ExchangeRateUpdateEntity;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExchangeRateService {
-    private final ExchangeRateDao exchangeRateDao;
+    private final JdbcExchangeRateDao exchangeRateDao;
 
-    public ExchangeRateService(ExchangeRateDao exchangeRateDao) {
+    public ExchangeRateService(JdbcExchangeRateDao exchangeRateDao) {
         this.exchangeRateDao = exchangeRateDao;
     }
 
@@ -28,7 +28,7 @@ public class ExchangeRateService {
                 exchangeRate.targetCurrencyCode(),
                 exchangeRate.rate()
         );
-        exchangeRateDao.save(entity);
+        exchangeRateDao.saveFromCodes(entity);
 
         CurrencyCodePair codePair = new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode());
         return getByCode(codePair);

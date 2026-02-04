@@ -1,6 +1,6 @@
 package org.roadmap.service;
 
-import org.roadmap.dao.CurrencyDao;
+import org.roadmap.dao.JdbcCurrencyDao;
 import org.roadmap.model.dto.request.CurrencyRequestDto;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.model.entity.CurrencyEntity;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CurrencyService {
-    private final CurrencyDao currencyDao;
+    private final JdbcCurrencyDao currencyDao;
 
-    public CurrencyService(CurrencyDao currencyDao) {
+    public CurrencyService(JdbcCurrencyDao currencyDao) {
         this.currencyDao = currencyDao;
     }
 
@@ -32,7 +32,7 @@ public class CurrencyService {
     }
 
     public CurrencyResponseDto get(String code) {
-        CurrencyEntity entity = currencyDao.getByCode(code);
+        CurrencyEntity entity = currencyDao.findByCode(code);
         return new CurrencyResponseDto(
                 entity.id(),
                 entity.name(),
