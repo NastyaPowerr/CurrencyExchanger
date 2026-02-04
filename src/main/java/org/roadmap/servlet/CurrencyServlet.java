@@ -37,7 +37,7 @@ public class CurrencyServlet extends HttpServlet {
         } catch (NoSuchElementException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 404, ex.getMessage());
         } catch (DatabaseException ex) {
-            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
         }
     }
 

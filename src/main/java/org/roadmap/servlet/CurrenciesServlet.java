@@ -39,7 +39,7 @@ public class CurrenciesServlet extends HttpServlet {
         } catch (EntityAlreadyExists ex) {
             ServletResponseUtil.sendErrorResponse(resp, 409, ex.getMessage());
         } catch (DatabaseException ex) {
-            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
         }
     }
 
@@ -49,7 +49,7 @@ public class CurrenciesServlet extends HttpServlet {
             List<CurrencyResponseDto> currencies = currencyService.getAll();
             ServletResponseUtil.sendSuccessResponse(resp, currencies);
         } catch (DatabaseException ex) {
-            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
         }
     }
 

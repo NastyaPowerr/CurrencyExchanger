@@ -44,7 +44,7 @@ public class ExchangeRatesServlet extends HttpServlet {
         } catch (EntityAlreadyExists ex) {
             ServletResponseUtil.sendErrorResponse(resp, 409, ex.getMessage());
         } catch (DatabaseException ex) {
-            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
         }
     }
 
@@ -54,7 +54,7 @@ public class ExchangeRatesServlet extends HttpServlet {
             List<ExchangeRateResponseDto> exchangeRates = exchangeRateService.getAll();
             ServletResponseUtil.sendSuccessResponse(resp, exchangeRates);
         } catch (DatabaseException ex) {
-            ServletResponseUtil.sendErrorResponse(resp, 500, ex.getMessage());
+            ServletResponseUtil.sendErrorResponse(resp, 500, "Internal error.");
         }
     }
 
