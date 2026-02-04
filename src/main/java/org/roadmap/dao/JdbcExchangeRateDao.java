@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class JdbcExchangeRateDao implements ExchangeRateDao {
     private static final String SAVE_WITH_CODES_QUERY = """
@@ -61,7 +62,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             statement.setBigDecimal(3, exchangeRate.rate());
 
             statement.executeUpdate();
-            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
+            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode())).get();
         } catch (SQLException ex) {
 
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
@@ -74,7 +75,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     @Override
-    public ExchangeRateEntity findByCodes(CurrencyCodePair codePair) {
+    public Optional<ExchangeRateEntity> findByCodes(CurrencyCodePair codePair) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_BY_CURRENCY_CODES)) {
             statement.setString(1, codePair.baseCurrencyCode());
@@ -82,7 +83,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
 
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
-                    return mapToExchangeRate(result);
+                    return Optional.of(mapToExchangeRate(result));
                 } else {
                     checkCurrencyExists(codePair.baseCurrencyCode());
                     checkCurrencyExists(codePair.targetCurrencyCode());
@@ -95,9 +96,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
                     ex
             );
         }
-        throw new NoSuchElementException("Exchange rate with code pair %s, %s not found.".formatted(
-                codePair.baseCurrencyCode(), codePair.targetCurrencyCode()
-        ));
+        return Optional.empty();
     }
 
     @Override
