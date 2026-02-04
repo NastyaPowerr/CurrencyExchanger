@@ -52,19 +52,18 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     public ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate) {
+        checkCurrencyExists(exchangeRate.baseCurrencyCode());
+        checkCurrencyExists(exchangeRate.targetCurrencyCode());
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
             statement.setString(1, exchangeRate.baseCurrencyCode());
             statement.setString(2, exchangeRate.targetCurrencyCode());
             statement.setBigDecimal(3, exchangeRate.rate());
 
-            int rowsInserted = statement.executeUpdate();
-            if (rowsInserted == 0) {
-                checkCurrencyExists(exchangeRate.baseCurrencyCode());
-                checkCurrencyExists(exchangeRate.targetCurrencyCode());
-            }
+            statement.executeUpdate();
             return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
         } catch (SQLException ex) {
+
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
                 throw new EntityAlreadyExistsException("Exchange rate with code pair %s, %s already exists.".formatted(
                         exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
@@ -137,11 +136,13 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
 
     private void checkCurrencyExists(String code) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(CURRENCY_EXISTS_QUERY);
-             ResultSet result = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(CURRENCY_EXISTS_QUERY)) {
             statement.setString(1, code);
-            if (!result.next()) {
-                throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
+                }
             }
         } catch (SQLException ex) {
             throw new DatabaseException("Failed to check existence of currency with code %s".formatted(code) + ex);

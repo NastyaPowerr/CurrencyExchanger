@@ -1,6 +1,7 @@
 package org.roadmap.service;
 
 import org.roadmap.dao.JdbcCurrencyDao;
+import org.roadmap.mapper.CurrencyMapper;
 import org.roadmap.model.dto.request.CurrencyRequestDto;
 import org.roadmap.model.dto.response.CurrencyResponseDto;
 import org.roadmap.model.entity.CurrencyEntity;
@@ -16,35 +17,20 @@ public class CurrencyService {
     }
 
     public CurrencyResponseDto save(CurrencyRequestDto dto) {
-        CurrencyEntity entity = new CurrencyEntity(
-                null,
-                dto.name(),
-                dto.code(),
-                dto.sign()
-        );
-        CurrencyEntity responseEntity = currencyDao.save(entity);
-        return new CurrencyResponseDto(
-                responseEntity.id(),
-                responseEntity.name(),
-                responseEntity.code(),
-                responseEntity.sign()
-        );
+        CurrencyEntity entity = CurrencyMapper.INSTANCE.toEntity(dto);
+        CurrencyEntity savedEntity = currencyDao.save(entity);
+        return CurrencyMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
     public CurrencyResponseDto get(String code) {
         CurrencyEntity entity = currencyDao.findByCode(code);
-        return new CurrencyResponseDto(
-                entity.id(),
-                entity.name(),
-                entity.code(),
-                entity.sign()
-        );
+        return CurrencyMapper.INSTANCE.toResponseDto(entity);
     }
 
     public List<CurrencyResponseDto> getAll() {
         List<CurrencyEntity> currencies = currencyDao.findAll();
         return currencies.stream()
-                .map(e -> new CurrencyResponseDto(e.id(), e.name(), e.code(), e.sign()))
+                .map(CurrencyMapper.INSTANCE::toResponseDto)
                 .collect(Collectors.toList());
     }
 }
