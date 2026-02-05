@@ -2,21 +2,36 @@ package org.roadmap.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.roadmap.exception.DatabaseException;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public final class ConnectionManagerUtil {
-    private static final String DB_PATH = "D:/idea_projects/CurrencyExchanger/currency_db.sqlite";
     private static final HikariDataSource dataSource;
+    private static final String PROPERTIES_PATH = "application.properties";
 
     private ConnectionManagerUtil() {
     }
 
     static {
         try {
-            Class.forName("org.sqlite.JDBC");
-            String url = "jdbc:sqlite:" + DB_PATH;
+            Properties properties = new Properties();
+            InputStream input = ConnectionManagerUtil.class
+                    .getClassLoader()
+                    .getResourceAsStream(PROPERTIES_PATH);
+            if (input != null) {
+                properties.load(input);
+            }
+
+            String url = properties.getProperty(
+                    "database.url",
+                    "jdbc:sqlite:D:/idea_projects/CurrencyExchanger/currency_db.sqlite"
+            );
+            String driverName = properties.getProperty("driver.className", "org.sqlite.JDBC");
+            Class.forName(driverName);
 
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(url);
@@ -24,6 +39,8 @@ public final class ConnectionManagerUtil {
             dataSource = new HikariDataSource(config);
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException("SQLite drive is not found" + ex);
+        } catch (Exception ex) {
+            throw new DatabaseException("Failed to connect to DB." + ex);
         }
     }
 
