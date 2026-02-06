@@ -10,6 +10,7 @@ import org.roadmap.dao.JdbcCurrencyDao;
 import org.roadmap.dao.JdbcExchangeRateDao;
 import org.roadmap.service.CurrencyService;
 import org.roadmap.service.ExchangeRateService;
+import org.roadmap.service.ExchangeService;
 import org.roadmap.util.ServletResponseUtil;
 import tools.jackson.databind.ObjectMapper;
 
@@ -22,12 +23,14 @@ public class ApplicationContextListener implements ServletContextListener {
         ExchangeRateDao exchangeRateDao = new JdbcExchangeRateDao();
         CurrencyService currencyService = new CurrencyService(currencyDao);
         ExchangeRateService exchangeRateService = new ExchangeRateService(exchangeRateDao);
+        ExchangeService exchangeService = new ExchangeService(exchangeRateDao);
 
         ServletContext context = sce.getServletContext();
         context.setAttribute("currencyDao", currencyDao);
         context.setAttribute("exchangeRateDao", exchangeRateDao);
         context.setAttribute("currencyService", currencyService);
         context.setAttribute("exchangeRateService", exchangeRateService);
+        context.setAttribute("exchangeService", exchangeService);
         context.setAttribute("objectMapper", objectMapper);
 
         ServletResponseUtil.init(objectMapper);
