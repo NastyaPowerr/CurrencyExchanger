@@ -54,8 +54,6 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
 
     @Override
     public ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate) {
-        checkCurrencyExists(exchangeRate.baseCurrencyCode());
-        checkCurrencyExists(exchangeRate.targetCurrencyCode());
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
             statement.setString(1, exchangeRate.baseCurrencyCode());
@@ -63,15 +61,17 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             statement.setBigDecimal(3, exchangeRate.rate());
 
             statement.executeUpdate();
-            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode())).get();
-        } catch (SQLException ex) {
 
+            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()))
+                    .orElseThrow(() -> new DatabaseException("Saved but not found"));
+        } catch (SQLException ex) {
+            checkCurrencyExists(exchangeRate.baseCurrencyCode());
+            checkCurrencyExists(exchangeRate.targetCurrencyCode());
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
                 throw new EntityAlreadyExistsException("Exchange rate with code pair %s, %s already exists.".formatted(
                         exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
-            } else {
-                throw new DatabaseException("Failed to save exchange rate.", ex);
             }
+            throw new DatabaseException("Failed to save exchange rate.", ex);
         }
     }
 
@@ -85,12 +85,11 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
                     return Optional.of(mapToExchangeRate(result));
-                } else {
-                    checkCurrencyExists(codePair.baseCurrencyCode());
-                    checkCurrencyExists(codePair.targetCurrencyCode());
                 }
             }
         } catch (SQLException ex) {
+            checkCurrencyExists(codePair.baseCurrencyCode());
+            checkCurrencyExists(codePair.targetCurrencyCode());
             throw new DatabaseException(
                     "Failed to fetch exchange rate with code pair %s, %s."
                             .formatted(codePair.baseCurrencyCode(), codePair.targetCurrencyCode()),
@@ -125,6 +124,8 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
 
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated == 0) {
+                checkCurrencyExists(exchangeRate.baseCurrencyCode());
+                checkCurrencyExists(exchangeRate.targetCurrencyCode());
                 throw new NoSuchElementException("Exchange rate with pair code %s, %s not found.".formatted(
                         exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode())
                 );
