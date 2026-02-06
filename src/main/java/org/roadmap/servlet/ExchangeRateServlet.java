@@ -64,7 +64,7 @@ public class ExchangeRateServlet extends HttpServlet {
         CurrencyCodePair codePair = extractAndValidateCodePair(req);
         String rateString = req.getReader().readLine();
         if (rateString == null) {
-            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_RATE_ERROR);
+            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_RATE_MESSAGE);
         }
         rateString = rateString.replace("rate=", "");
 

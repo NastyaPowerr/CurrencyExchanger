@@ -5,8 +5,8 @@ import org.roadmap.exception.ValidationException;
 public final class CurrencyValidatorUtil {
     private static final int MIN_NAME_LENGTH = 2;
     private static final int MAX_NAME_LENGTH = 100;
-    private static final String CODE_PATTERN = "[A-Z]{3}";
     private static final int SIGN_LENGTH = 1;
+    private static final String CODE_PATTERN = "[A-Z]{3}";
     private static final String MISSING_NAME_MESSAGE = "Currency name is required.";
     private static final String MISSING_CODE_MESSAGE = "Currency code is required.";
     private static final String MISSING_SIGN_MESSAGE = "Currency sign is required.";
