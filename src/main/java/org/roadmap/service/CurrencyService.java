@@ -22,7 +22,7 @@ public class CurrencyService {
         return CurrencyMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
-    public CurrencyResponseDto get(String code) {
+    public CurrencyResponseDto getByCode(String code) {
         CurrencyEntity entity = currencyDao.findByCode(code);
         return CurrencyMapper.INSTANCE.toResponseDto(entity);
     }

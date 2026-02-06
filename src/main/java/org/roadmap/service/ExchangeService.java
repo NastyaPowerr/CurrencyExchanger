@@ -1,7 +1,6 @@
 package org.roadmap.service;
 
 import org.roadmap.dao.ExchangeRateDao;
-import org.roadmap.dao.JdbcExchangeRateDao;
 import org.roadmap.mapper.CurrencyMapper;
 import org.roadmap.model.dto.request.ExchangeRequestDto;
 import org.roadmap.model.dto.response.ExchangeResponseDto;

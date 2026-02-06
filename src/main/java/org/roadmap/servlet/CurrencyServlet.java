@@ -29,7 +29,7 @@ public class CurrencyServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String code = extractAndValidateCode(req);
-            CurrencyResponseDto currency = currencyService.get(code);
+            CurrencyResponseDto currency = currencyService.getByCode(code);
 
             ServletResponseUtil.sendSuccessResponse(resp, currency);
         } catch (ValidationException ex) {

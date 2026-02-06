@@ -9,7 +9,6 @@ import org.roadmap.exception.DatabaseException;
 import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.request.ExchangeRequestDto;
 import org.roadmap.model.dto.response.ExchangeResponseDto;
-import org.roadmap.service.ExchangeRateService;
 import org.roadmap.service.ExchangeService;
 import org.roadmap.util.CurrencyValidatorUtil;
 import org.roadmap.util.ExchangeRateValidatorUtil;
