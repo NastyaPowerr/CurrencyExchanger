@@ -10,4 +10,6 @@ public interface ExchangeRateDao extends CrudDao<ExchangeRateEntity> {
     Optional<ExchangeRateEntity> findByCodes(CurrencyCodePair codePair);
 
     void update(ExchangeRateUpdateEntity exchangeRate);
+
+    ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate);
 }

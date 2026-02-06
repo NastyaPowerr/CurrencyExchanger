@@ -1,6 +1,6 @@
 package org.roadmap.service;
 
-import org.roadmap.dao.JdbcExchangeRateDao;
+import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.mapper.CurrencyMapper;
 import org.roadmap.mapper.ExchangeRateMapper;
 import org.roadmap.model.dto.request.ExchangeRateRequestDto;
@@ -22,9 +22,9 @@ public class ExchangeRateService {
     private final static RoundingMode BANK_ROUNDING = RoundingMode.HALF_EVEN;
     private final static int RATE_SCALE = 6;
     private final static int MONEY_DISPLAY_SCALE = 2;
-    private final JdbcExchangeRateDao exchangeRateDao;
+    private final ExchangeRateDao exchangeRateDao;
 
-    public ExchangeRateService(JdbcExchangeRateDao exchangeRateDao) {
+    public ExchangeRateService(ExchangeRateDao exchangeRateDao) {
         this.exchangeRateDao = exchangeRateDao;
     }
 

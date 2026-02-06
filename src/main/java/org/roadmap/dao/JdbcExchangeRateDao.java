@@ -52,6 +52,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
         ));
     }
 
+    @Override
     public ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate) {
         checkCurrencyExists(exchangeRate.baseCurrencyCode());
         checkCurrencyExists(exchangeRate.targetCurrencyCode());

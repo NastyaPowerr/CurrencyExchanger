@@ -4,6 +4,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import org.roadmap.dao.CurrencyDao;
+import org.roadmap.dao.ExchangeRateDao;
 import org.roadmap.dao.JdbcCurrencyDao;
 import org.roadmap.dao.JdbcExchangeRateDao;
 import org.roadmap.service.CurrencyService;
@@ -16,8 +18,8 @@ public class ApplicationContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ObjectMapper objectMapper = new ObjectMapper();
-        JdbcCurrencyDao currencyDao = new JdbcCurrencyDao();
-        JdbcExchangeRateDao exchangeRateDao = new JdbcExchangeRateDao();
+        CurrencyDao currencyDao = new JdbcCurrencyDao();
+        ExchangeRateDao exchangeRateDao = new JdbcExchangeRateDao();
         CurrencyService currencyService = new CurrencyService(currencyDao);
         ExchangeRateService exchangeRateService = new ExchangeRateService(exchangeRateDao);
 
@@ -29,7 +31,5 @@ public class ApplicationContextListener implements ServletContextListener {
         context.setAttribute("objectMapper", objectMapper);
 
         ServletResponseUtil.init(objectMapper);
-
-        System.out.println("AppContextInitialized");
     }
 }
