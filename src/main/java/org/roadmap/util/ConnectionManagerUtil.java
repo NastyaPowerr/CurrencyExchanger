@@ -38,7 +38,7 @@ public final class ConnectionManagerUtil {
 
             dataSource = new HikariDataSource(config);
         } catch (ClassNotFoundException ex) {
-            throw new RuntimeException("SQLite drive is not found" + ex);
+            throw new IllegalStateException("Failed to load SQLite drive" + ex);
         } catch (Exception ex) {
             throw new DatabaseException("Failed to connect to DB." + ex);
         }
