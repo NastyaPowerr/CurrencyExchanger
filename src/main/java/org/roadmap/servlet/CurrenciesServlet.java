@@ -17,7 +17,7 @@ import org.roadmap.util.ServletResponseUtil;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/currencies/*")
+@WebServlet("/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
     private CurrencyService currencyService;
 
