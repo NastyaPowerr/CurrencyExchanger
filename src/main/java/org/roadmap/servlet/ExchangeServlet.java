@@ -34,7 +34,7 @@ public class ExchangeServlet extends HttpServlet {
             ExchangeRequestDto exchangeRequestDto = extractAndValidateExchangeRequest(req);
             ExchangeResponseDto response = exchangeService.exchange(exchangeRequestDto);
 
-            ServletResponseUtil.sendSuccessResponse(resp, response);
+            ServletResponseUtil.sendSuccessResponse(resp, 200, response);
         } catch (ValidationException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {

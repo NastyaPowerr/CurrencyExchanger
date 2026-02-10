@@ -15,7 +15,7 @@ import org.roadmap.util.ServletResponseUtil;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-@WebServlet("/currency")
+@WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
     private CurrencyService currencyService;
 
@@ -31,7 +31,7 @@ public class CurrencyServlet extends HttpServlet {
             String code = extractAndValidateCode(req);
             CurrencyResponseDto currency = currencyService.getByCode(code);
 
-            ServletResponseUtil.sendSuccessResponse(resp, currency);
+            ServletResponseUtil.sendSuccessResponse(resp, 200, currency);
         } catch (ValidationException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {
