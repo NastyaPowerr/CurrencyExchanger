@@ -15,7 +15,7 @@ import org.roadmap.util.ServletResponseUtil;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-@WebServlet("/currency/*")
+@WebServlet("/currency")
 public class CurrencyServlet extends HttpServlet {
     private CurrencyService currencyService;
 
