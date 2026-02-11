@@ -1,0 +1,36 @@
+package org.roadmap.currencyexchanger.service;
+
+import org.roadmap.currencyexchanger.dao.CurrencyDao;
+import org.roadmap.currencyexchanger.mapper.CurrencyMapper;
+import org.roadmap.currencyexchanger.model.dto.request.CurrencyRequestDto;
+import org.roadmap.currencyexchanger.model.dto.response.CurrencyResponseDto;
+import org.roadmap.currencyexchanger.model.entity.CurrencyEntity;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class CurrencyService {
+    private final CurrencyDao currencyDao;
+
+    public CurrencyService(CurrencyDao currencyDao) {
+        this.currencyDao = currencyDao;
+    }
+
+    public CurrencyResponseDto save(CurrencyRequestDto dto) {
+        CurrencyEntity entity = CurrencyMapper.INSTANCE.toEntity(dto);
+        CurrencyEntity savedEntity = currencyDao.save(entity);
+        return CurrencyMapper.INSTANCE.toResponseDto(savedEntity);
+    }
+
+    public CurrencyResponseDto getByCode(String code) {
+        CurrencyEntity entity = currencyDao.findByCode(code);
+        return CurrencyMapper.INSTANCE.toResponseDto(entity);
+    }
+
+    public List<CurrencyResponseDto> getAll() {
+        List<CurrencyEntity> currencies = currencyDao.findAll();
+        return currencies.stream()
+                .map(CurrencyMapper.INSTANCE::toResponseDto)
+                .collect(Collectors.toList());
+    }
+}
