@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import org.roadmap.exception.DatabaseException;
 import org.roadmap.exception.ValidationException;
 import org.roadmap.model.dto.request.ExchangeRateRequestDto;
@@ -75,10 +76,15 @@ public class ExchangeRateServlet extends HttpServlet {
 
     private static CurrencyCodePair extractAndValidateCodePair(HttpServletRequest req) {
         String path = req.getPathInfo();
-        String code = path.substring(1);
-
-        String baseCurrencyCode = code.substring(0, 3);
-        String targetCurrencyCode = code.substring(3);
+        if (path == null || path.equals("/")) {
+            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_CODE_PAIR_MESSAGE);
+        }
+        String inputCodePair = path.substring(1);
+        if (inputCodePair.length() != 6) {
+            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_CODE_PAIR_MESSAGE);
+        }
+        String baseCurrencyCode = inputCodePair.substring(0, 3);
+        String targetCurrencyCode = inputCodePair.substring(3);
 
         CurrencyCodePair codePair = new CurrencyCodePair(baseCurrencyCode.toUpperCase(), targetCurrencyCode.toUpperCase());
         ExchangeRateValidatorUtil.validateCodePair(codePair);

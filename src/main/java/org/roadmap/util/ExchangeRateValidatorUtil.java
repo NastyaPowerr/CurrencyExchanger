@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 
 public final class ExchangeRateValidatorUtil {
     private static final String MISSING_AMOUNT_MESSAGE = "Amount is required.";
-    private static final String MISSING_CODE_PAIR_MESSAGE = "Code pair is required.";
     private static final BigDecimal MIN_RATE = BigDecimal.valueOf(0.00001).stripTrailingZeros();
     private static final BigDecimal MIN_AMOUNT = BigDecimal.ZERO;
     private static final String INVALID_AMOUNT_MESSAGE =
@@ -20,6 +19,7 @@ public final class ExchangeRateValidatorUtil {
     public static final String INVALID_STRING_AMOUNT_MESSAGE =
             "Exchange amount must be a number and cannot be lesser than %s.".formatted(MIN_RATE);
     private static final String SAME_CURRENCY_MESSAGE = "Cannot exchange currency to itself.";
+    public static final String MISSING_CODE_PAIR_MESSAGE = "Code pair is required. Expected 6 characters (two 3-letter codes).";
 
     private ExchangeRateValidatorUtil() {
     }
@@ -36,8 +36,12 @@ public final class ExchangeRateValidatorUtil {
         if (codePair == null) {
             throw new ValidationException(MISSING_CODE_PAIR_MESSAGE);
         }
-        CurrencyValidatorUtil.validateCode(codePair.baseCurrencyCode());
-        CurrencyValidatorUtil.validateCode(codePair.targetCurrencyCode());
+        try {
+            CurrencyValidatorUtil.validateCode(codePair.baseCurrencyCode());
+            CurrencyValidatorUtil.validateCode(codePair.targetCurrencyCode());
+        } catch (ValidationException ex) {
+            throw new ValidationException(MISSING_CODE_PAIR_MESSAGE);
+        }
         if (codePair.baseCurrencyCode().equals(codePair.targetCurrencyCode())) {
             throw new ValidationException(SAME_CURRENCY_MESSAGE);
         }
