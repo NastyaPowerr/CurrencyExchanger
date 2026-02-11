@@ -51,7 +51,7 @@ public class ExchangeRateServlet extends HttpServlet {
             ExchangeRateRequestDto exchangeRate = extractAndValidateExchangeRateRequest(req);
             ExchangeRateResponseDto exchangeRateResponseDto = exchangeRateService.update(exchangeRate);
 
-            ServletResponseUtil.sendSuccessResponse(resp, 201, exchangeRateResponseDto);
+            ServletResponseUtil.sendSuccessResponse(resp, 200, exchangeRateResponseDto);
         } catch (ValidationException ex) {
             ServletResponseUtil.sendErrorResponse(resp, 400, ex.getMessage());
         } catch (NoSuchElementException ex) {
