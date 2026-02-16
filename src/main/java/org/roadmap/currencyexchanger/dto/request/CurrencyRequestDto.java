@@ -1,4 +1,4 @@
-package org.roadmap.currencyexchanger.model.dto.request;
+package org.roadmap.currencyexchanger.dto.request;
 
 public record CurrencyRequestDto(String name, String code, String sign) {
 }

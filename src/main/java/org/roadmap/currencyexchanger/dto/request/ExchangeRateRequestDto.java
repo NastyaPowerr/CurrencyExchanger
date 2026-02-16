@@ -1,4 +1,4 @@
-package org.roadmap.currencyexchanger.model.dto.request;
+package org.roadmap.currencyexchanger.dto.request;
 
 import java.math.BigDecimal;
 

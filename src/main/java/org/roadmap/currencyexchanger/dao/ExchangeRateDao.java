@@ -1,8 +1,8 @@
 package org.roadmap.currencyexchanger.dao;
 
-import org.roadmap.currencyexchanger.model.entity.CurrencyCodePair;
-import org.roadmap.currencyexchanger.model.entity.ExchangeRateEntity;
-import org.roadmap.currencyexchanger.model.entity.ExchangeRateUpdateEntity;
+import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
+import org.roadmap.currencyexchanger.entity.ExchangeRateUpdateEntity;
 
 import java.util.Optional;
 

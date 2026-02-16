@@ -1,7 +1,7 @@
 package org.roadmap.currencyexchanger.util;
 
 import org.roadmap.currencyexchanger.exception.ValidationException;
-import org.roadmap.currencyexchanger.model.entity.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
 
 import java.math.BigDecimal;
 

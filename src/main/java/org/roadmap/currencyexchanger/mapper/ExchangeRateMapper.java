@@ -3,8 +3,8 @@ package org.roadmap.currencyexchanger.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.roadmap.currencyexchanger.model.dto.response.ExchangeRateResponseDto;
-import org.roadmap.currencyexchanger.model.entity.ExchangeRateEntity;
+import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
+import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
 
 @Mapper(uses = CurrencyMapper.class)
 public interface ExchangeRateMapper {

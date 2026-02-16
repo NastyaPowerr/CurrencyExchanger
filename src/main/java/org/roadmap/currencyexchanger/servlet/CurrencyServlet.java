@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.ValidationException;
-import org.roadmap.currencyexchanger.model.dto.response.CurrencyResponseDto;
+import org.roadmap.currencyexchanger.dto.response.CurrencyResponseDto;
 import org.roadmap.currencyexchanger.service.CurrencyService;
 import org.roadmap.currencyexchanger.util.CurrencyValidatorUtil;
 import org.roadmap.currencyexchanger.util.ServletResponseUtil;

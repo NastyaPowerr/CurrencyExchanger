@@ -2,9 +2,9 @@ package org.roadmap.currencyexchanger.service;
 
 import org.roadmap.currencyexchanger.dao.CurrencyDao;
 import org.roadmap.currencyexchanger.mapper.CurrencyMapper;
-import org.roadmap.currencyexchanger.model.dto.request.CurrencyRequestDto;
-import org.roadmap.currencyexchanger.model.dto.response.CurrencyResponseDto;
-import org.roadmap.currencyexchanger.model.entity.CurrencyEntity;
+import org.roadmap.currencyexchanger.dto.request.CurrencyRequestDto;
+import org.roadmap.currencyexchanger.dto.response.CurrencyResponseDto;
+import org.roadmap.currencyexchanger.entity.CurrencyEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;

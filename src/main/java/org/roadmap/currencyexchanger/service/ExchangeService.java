@@ -2,10 +2,10 @@ package org.roadmap.currencyexchanger.service;
 
 import org.roadmap.currencyexchanger.dao.ExchangeRateDao;
 import org.roadmap.currencyexchanger.mapper.CurrencyMapper;
-import org.roadmap.currencyexchanger.model.dto.request.ExchangeRequestDto;
-import org.roadmap.currencyexchanger.model.dto.response.ExchangeResponseDto;
-import org.roadmap.currencyexchanger.model.entity.CurrencyCodePair;
-import org.roadmap.currencyexchanger.model.entity.ExchangeRateEntity;
+import org.roadmap.currencyexchanger.dto.request.ExchangeRequestDto;
+import org.roadmap.currencyexchanger.dto.response.ExchangeResponseDto;
+import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

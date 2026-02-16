@@ -1,4 +1,4 @@
-package org.roadmap.currencyexchanger.model.dto.response;
+package org.roadmap.currencyexchanger.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 

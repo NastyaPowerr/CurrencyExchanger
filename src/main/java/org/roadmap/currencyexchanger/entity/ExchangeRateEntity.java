@@ -1,4 +1,4 @@
-package org.roadmap.currencyexchanger.model.entity;
+package org.roadmap.currencyexchanger.entity;
 
 import java.math.BigDecimal;
 

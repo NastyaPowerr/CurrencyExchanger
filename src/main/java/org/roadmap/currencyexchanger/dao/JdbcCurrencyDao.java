@@ -2,7 +2,7 @@ package org.roadmap.currencyexchanger.dao;
 
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
-import org.roadmap.currencyexchanger.model.entity.CurrencyEntity;
+import org.roadmap.currencyexchanger.entity.CurrencyEntity;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
