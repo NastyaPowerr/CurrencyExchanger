@@ -32,7 +32,5 @@ public class ApplicationContextListener implements ServletContextListener {
         context.setAttribute("exchangeRateService", exchangeRateService);
         context.setAttribute("exchangeService", exchangeService);
         context.setAttribute("objectMapper", objectMapper);
-
-        ServletResponseUtil.init(objectMapper);
     }
 }

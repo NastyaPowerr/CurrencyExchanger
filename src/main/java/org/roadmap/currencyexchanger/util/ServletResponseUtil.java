@@ -8,17 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ServletResponseUtil {
-    private static ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private ServletResponseUtil() {
-    }
-
-    public static void init(ObjectMapper mapper) {
-        if (objectMapper == null) {
-            objectMapper = mapper;
-        } else {
-            throw new IllegalStateException("ObjectMapper already initialized.");
-        }
     }
 
     public static void sendSuccessResponse(HttpServletResponse resp, int successCode, Object responseDto) throws IOException {
