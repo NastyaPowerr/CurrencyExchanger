@@ -1,12 +1,12 @@
 package org.roadmap.currencyexchanger.service;
 
 import org.roadmap.currencyexchanger.dao.ExchangeRateDao;
-import org.roadmap.currencyexchanger.entity.ExchangeRate;
-import org.roadmap.currencyexchanger.mapper.ExchangeRateMapper;
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
 import org.roadmap.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
-import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
-import org.roadmap.currencyexchanger.entity.ExchangeRateUpdate;
+import org.roadmap.currencyexchanger.entity.Currency;
+import org.roadmap.currencyexchanger.entity.ExchangeRate;
+import org.roadmap.currencyexchanger.mapper.ExchangeRateMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +21,13 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateResponseDto save(ExchangeRateRequestDto exchangeRate) {
-        ExchangeRateUpdate entity = new ExchangeRateUpdate(
-                exchangeRate.baseCurrencyCode(),
-                exchangeRate.targetCurrencyCode(),
+        ExchangeRate entity = new ExchangeRate(
+                null,
+                new Currency(null, null, exchangeRate.baseCurrencyCode(), null),
+                new Currency(null, null, exchangeRate.targetCurrencyCode(), null),
                 exchangeRate.rate()
         );
-        ExchangeRate savedEntity = exchangeRateDao.saveFromCodes(entity);
+        ExchangeRate savedEntity = exchangeRateDao.save(entity);
         return ExchangeRateMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
@@ -52,9 +53,10 @@ public class ExchangeRateService {
 
     public ExchangeRateResponseDto update(ExchangeRateRequestDto exchangeRate) {
         CurrencyCodePair codePair = new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode());
-        ExchangeRateUpdate entity = new ExchangeRateUpdate(
-                exchangeRate.baseCurrencyCode(),
-                exchangeRate.targetCurrencyCode(),
+        ExchangeRate entity = new ExchangeRate(
+                null,
+                new Currency(null, null, exchangeRate.baseCurrencyCode(), null),
+                new Currency(null, null, exchangeRate.targetCurrencyCode(), null),
                 exchangeRate.rate()
         );
         exchangeRateDao.update(entity);

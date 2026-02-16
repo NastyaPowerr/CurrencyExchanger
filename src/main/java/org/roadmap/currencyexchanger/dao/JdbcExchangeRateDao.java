@@ -1,11 +1,10 @@
 package org.roadmap.currencyexchanger.dao;
 
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
 import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.entity.ExchangeRate;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
-import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
-import org.roadmap.currencyexchanger.entity.ExchangeRateUpdate;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -49,32 +48,23 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     private static final int CONSTRAINT_UNIQUE_ERROR = 19;
 
     @Override
-    public ExchangeRate save(ExchangeRate entity) {
-        return saveFromCodes(new ExchangeRateUpdate(
-                entity.baseCurrency().code(),
-                entity.targetCurrency().code(),
-                entity.rate()
-        ));
-    }
-
-    @Override
-    public ExchangeRate saveFromCodes(ExchangeRateUpdate exchangeRate) {
+    public ExchangeRate save(ExchangeRate exchangeRate) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
-            statement.setString(1, exchangeRate.baseCurrencyCode());
-            statement.setString(2, exchangeRate.targetCurrencyCode());
+            statement.setString(1, exchangeRate.baseCurrency().code());
+            statement.setString(2, exchangeRate.targetCurrency().code());
             statement.setBigDecimal(3, exchangeRate.rate());
 
             statement.executeUpdate();
 
-            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()))
+            return findByCodes(new CurrencyCodePair(exchangeRate.baseCurrency().code(), exchangeRate.targetCurrency().code()))
                     .orElseThrow(() -> new DatabaseException("Saved but not found"));
         } catch (SQLException ex) {
-            checkCurrencyExists(exchangeRate.baseCurrencyCode());
-            checkCurrencyExists(exchangeRate.targetCurrencyCode());
+            checkCurrencyExists(exchangeRate.baseCurrency().code());
+            checkCurrencyExists(exchangeRate.targetCurrency().code());
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
                 throw new EntityAlreadyExistsException("Exchange rate with code pair %s, %s already exists.".formatted(
-                        exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode()));
+                        exchangeRate.baseCurrency().code(), exchangeRate.targetCurrency().code()));
             }
             throw new DatabaseException("Failed to save exchange rate.", ex);
         }
@@ -120,19 +110,19 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     @Override
-    public void update(ExchangeRateUpdate exchangeRate) {
+    public void update(ExchangeRate exchangeRate) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_BY_CODES_QUERY)) {
             statement.setBigDecimal(1, exchangeRate.rate());
-            statement.setString(2, exchangeRate.baseCurrencyCode());
-            statement.setString(3, exchangeRate.targetCurrencyCode());
+            statement.setString(2, exchangeRate.baseCurrency().code());
+            statement.setString(3, exchangeRate.targetCurrency().code());
 
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated == 0) {
-                checkCurrencyExists(exchangeRate.baseCurrencyCode());
-                checkCurrencyExists(exchangeRate.targetCurrencyCode());
+                checkCurrencyExists(exchangeRate.baseCurrency().code());
+                checkCurrencyExists(exchangeRate.targetCurrency().code());
                 throw new NoSuchElementException("Exchange rate with pair code %s, %s not found.".formatted(
-                        exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode())
+                        exchangeRate.baseCurrency().code(), exchangeRate.targetCurrency().code())
                 );
             }
         } catch (SQLException ex) {
