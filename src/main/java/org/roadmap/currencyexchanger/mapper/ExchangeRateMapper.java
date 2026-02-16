@@ -10,7 +10,7 @@ import org.roadmap.currencyexchanger.entity.ExchangeRate;
 public interface ExchangeRateMapper {
     ExchangeRateMapper INSTANCE = Mappers.getMapper(ExchangeRateMapper.class);
 
-    @Mapping(source = "baseCurrencyEntity", target = "baseCurrency")
-    @Mapping(source = "targetCurrencyEntity", target = "targetCurrency")
+    @Mapping(source = "baseCurrency", target = "baseCurrency")
+    @Mapping(source = "targetCurrency", target = "targetCurrency")
     ExchangeRateResponseDto toResponseDto(ExchangeRate entity);
 }
