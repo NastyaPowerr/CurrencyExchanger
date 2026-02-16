@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
-import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
+import org.roadmap.currencyexchanger.entity.ExchangeRate;
 
 @Mapper(uses = CurrencyMapper.class)
 public interface ExchangeRateMapper {
@@ -12,5 +12,5 @@ public interface ExchangeRateMapper {
 
     @Mapping(source = "baseCurrencyEntity", target = "baseCurrency")
     @Mapping(source = "targetCurrencyEntity", target = "targetCurrency")
-    ExchangeRateResponseDto toResponseDto(ExchangeRateEntity entity);
+    ExchangeRateResponseDto toResponseDto(ExchangeRate entity);
 }

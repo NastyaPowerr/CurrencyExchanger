@@ -1,12 +1,12 @@
 package org.roadmap.currencyexchanger.service;
 
 import org.roadmap.currencyexchanger.dao.ExchangeRateDao;
+import org.roadmap.currencyexchanger.entity.ExchangeRate;
 import org.roadmap.currencyexchanger.mapper.ExchangeRateMapper;
 import org.roadmap.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
-import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
-import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
-import org.roadmap.currencyexchanger.entity.ExchangeRateUpdateEntity;
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.ExchangeRateUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,17 +21,17 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateResponseDto save(ExchangeRateRequestDto exchangeRate) {
-        ExchangeRateUpdateEntity entity = new ExchangeRateUpdateEntity(
+        ExchangeRateUpdate entity = new ExchangeRateUpdate(
                 exchangeRate.baseCurrencyCode(),
                 exchangeRate.targetCurrencyCode(),
                 exchangeRate.rate()
         );
-        ExchangeRateEntity savedEntity = exchangeRateDao.saveFromCodes(entity);
+        ExchangeRate savedEntity = exchangeRateDao.saveFromCodes(entity);
         return ExchangeRateMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
     public ExchangeRateResponseDto getByCode(CurrencyCodePair codePair) {
-        Optional<ExchangeRateEntity> rateEntityOpt = exchangeRateDao.findByCodes(codePair);
+        Optional<ExchangeRate> rateEntityOpt = exchangeRateDao.findByCodes(codePair);
         if (rateEntityOpt.isPresent()) {
             return ExchangeRateMapper.INSTANCE.toResponseDto(rateEntityOpt.get());
         }
@@ -41,10 +41,10 @@ public class ExchangeRateService {
     }
 
     public List<ExchangeRateResponseDto> getAll() {
-        List<ExchangeRateEntity> exchangeRates = exchangeRateDao.findAll();
+        List<ExchangeRate> exchangeRates = exchangeRateDao.findAll();
         List<ExchangeRateResponseDto> exchangeRateResponses = new ArrayList<>();
 
-        for (ExchangeRateEntity rateEntity : exchangeRates) {
+        for (ExchangeRate rateEntity : exchangeRates) {
             exchangeRateResponses.add(ExchangeRateMapper.INSTANCE.toResponseDto(rateEntity));
         }
         return exchangeRateResponses;
@@ -52,7 +52,7 @@ public class ExchangeRateService {
 
     public ExchangeRateResponseDto update(ExchangeRateRequestDto exchangeRate) {
         CurrencyCodePair codePair = new CurrencyCodePair(exchangeRate.baseCurrencyCode(), exchangeRate.targetCurrencyCode());
-        ExchangeRateUpdateEntity entity = new ExchangeRateUpdateEntity(
+        ExchangeRateUpdate entity = new ExchangeRateUpdate(
                 exchangeRate.baseCurrencyCode(),
                 exchangeRate.targetCurrencyCode(),
                 exchangeRate.rate()

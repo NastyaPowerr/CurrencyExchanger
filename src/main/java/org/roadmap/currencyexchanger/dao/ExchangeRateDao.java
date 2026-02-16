@@ -1,15 +1,15 @@
 package org.roadmap.currencyexchanger.dao;
 
-import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
-import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
-import org.roadmap.currencyexchanger.entity.ExchangeRateUpdateEntity;
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.ExchangeRate;
+import org.roadmap.currencyexchanger.entity.ExchangeRateUpdate;
 
 import java.util.Optional;
 
-public interface ExchangeRateDao extends CrudDao<ExchangeRateEntity> {
-    Optional<ExchangeRateEntity> findByCodes(CurrencyCodePair codePair);
+public interface ExchangeRateDao extends CrudDao<ExchangeRate> {
+    Optional<ExchangeRate> findByCodes(CurrencyCodePair codePair);
 
-    void update(ExchangeRateUpdateEntity exchangeRate);
+    void update(ExchangeRateUpdate exchangeRate);
 
-    ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate);
+    ExchangeRate saveFromCodes(ExchangeRateUpdate exchangeRate);
 }

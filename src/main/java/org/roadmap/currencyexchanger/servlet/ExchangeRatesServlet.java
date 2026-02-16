@@ -10,7 +10,7 @@ import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
 import org.roadmap.currencyexchanger.exception.ValidationException;
 import org.roadmap.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
-import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
 import org.roadmap.currencyexchanger.service.ExchangeRateService;
 import org.roadmap.currencyexchanger.util.ExchangeRateValidatorUtil;
 import org.roadmap.currencyexchanger.util.ServletResponseUtil;

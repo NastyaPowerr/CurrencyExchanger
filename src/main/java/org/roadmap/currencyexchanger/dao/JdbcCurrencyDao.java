@@ -1,8 +1,8 @@
 package org.roadmap.currencyexchanger.dao;
 
+import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
-import org.roadmap.currencyexchanger.entity.CurrencyEntity;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -21,31 +21,31 @@ public class JdbcCurrencyDao implements CurrencyDao {
     private static final int CONSTRAINT_UNIQUE_ERROR = 19;
 
     @Override
-    public CurrencyEntity save(CurrencyEntity currencyEntity) {
+    public Currency save(Currency currency) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_QUERY, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, currencyEntity.code());
-            statement.setString(2, currencyEntity.name());
-            statement.setString(3, currencyEntity.sign());
+            statement.setString(1, currency.code());
+            statement.setString(2, currency.name());
+            statement.setString(3, currency.sign());
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     Long id = generatedKeys.getLong(1);
-                    return new CurrencyEntity(id, currencyEntity.name(), currencyEntity.code(), currencyEntity.sign());
+                    return new Currency(id, currency.name(), currency.code(), currency.sign());
                 }
                 throw new DatabaseException("Failed to fetch generated id after save operation.");
             }
         } catch (SQLException ex) {
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
-                throw new EntityAlreadyExistsException("Currency with code %s already exists.".formatted(currencyEntity.code()));
+                throw new EntityAlreadyExistsException("Currency with code %s already exists.".formatted(currency.code()));
             }
             throw new DatabaseException("Failed during save operation.", ex);
         }
     }
 
     @Override
-    public CurrencyEntity findByCode(String code) {
+    public Currency findByCode(String code) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BY_CODE_QUERY)) {
             statement.setString(1, code);
@@ -62,8 +62,8 @@ public class JdbcCurrencyDao implements CurrencyDao {
     }
 
     @Override
-    public List<CurrencyEntity> findAll() {
-        List<CurrencyEntity> currencies = new ArrayList<>();
+    public List<Currency> findAll() {
+        List<Currency> currencies = new ArrayList<>();
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
@@ -76,11 +76,11 @@ public class JdbcCurrencyDao implements CurrencyDao {
         }
     }
 
-    private CurrencyEntity mapToCurrency(ResultSet result) throws SQLException {
+    private Currency mapToCurrency(ResultSet result) throws SQLException {
         Long id = result.getLong("id");
         String code = result.getString("code");
         String name = result.getString("full_name");
         String sign = result.getString("sign");
-        return new CurrencyEntity(id, name, code, sign);
+        return new Currency(id, name, code, sign);
     }
 }

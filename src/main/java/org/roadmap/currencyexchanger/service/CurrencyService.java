@@ -1,10 +1,10 @@
 package org.roadmap.currencyexchanger.service;
 
 import org.roadmap.currencyexchanger.dao.CurrencyDao;
+import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.mapper.CurrencyMapper;
 import org.roadmap.currencyexchanger.dto.request.CurrencyRequestDto;
 import org.roadmap.currencyexchanger.dto.response.CurrencyResponseDto;
-import org.roadmap.currencyexchanger.entity.CurrencyEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,18 +17,18 @@ public class CurrencyService {
     }
 
     public CurrencyResponseDto save(CurrencyRequestDto dto) {
-        CurrencyEntity entity = CurrencyMapper.INSTANCE.toEntity(dto);
-        CurrencyEntity savedEntity = currencyDao.save(entity);
+        Currency entity = CurrencyMapper.INSTANCE.toEntity(dto);
+        Currency savedEntity = currencyDao.save(entity);
         return CurrencyMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
     public CurrencyResponseDto getByCode(String code) {
-        CurrencyEntity entity = currencyDao.findByCode(code);
+        Currency entity = currencyDao.findByCode(code);
         return CurrencyMapper.INSTANCE.toResponseDto(entity);
     }
 
     public List<CurrencyResponseDto> getAll() {
-        List<CurrencyEntity> currencies = currencyDao.findAll();
+        List<Currency> currencies = currencyDao.findAll();
         return currencies.stream()
                 .map(CurrencyMapper.INSTANCE::toResponseDto)
                 .collect(Collectors.toList());

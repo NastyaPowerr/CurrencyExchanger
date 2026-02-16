@@ -1,11 +1,11 @@
 package org.roadmap.currencyexchanger.dao;
 
+import org.roadmap.currencyexchanger.entity.Currency;
+import org.roadmap.currencyexchanger.entity.ExchangeRate;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
-import org.roadmap.currencyexchanger.entity.CurrencyCodePair;
-import org.roadmap.currencyexchanger.entity.CurrencyEntity;
-import org.roadmap.currencyexchanger.entity.ExchangeRateEntity;
-import org.roadmap.currencyexchanger.entity.ExchangeRateUpdateEntity;
+import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
+import org.roadmap.currencyexchanger.entity.ExchangeRateUpdate;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -44,16 +44,16 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     private static final int CONSTRAINT_UNIQUE_ERROR = 19;
 
     @Override
-    public ExchangeRateEntity save(ExchangeRateEntity entity) {
-        return saveFromCodes(new ExchangeRateUpdateEntity(
-                entity.baseCurrencyEntity().code(),
-                entity.targetCurrencyEntity().code(),
+    public ExchangeRate save(ExchangeRate entity) {
+        return saveFromCodes(new ExchangeRateUpdate(
+                entity.baseCurrency().code(),
+                entity.targetCurrency().code(),
                 entity.rate()
         ));
     }
 
     @Override
-    public ExchangeRateEntity saveFromCodes(ExchangeRateUpdateEntity exchangeRate) {
+    public ExchangeRate saveFromCodes(ExchangeRateUpdate exchangeRate) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
             statement.setString(1, exchangeRate.baseCurrencyCode());
@@ -76,7 +76,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     @Override
-    public Optional<ExchangeRateEntity> findByCodes(CurrencyCodePair codePair) {
+    public Optional<ExchangeRate> findByCodes(CurrencyCodePair codePair) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_BY_CURRENCY_CODES)) {
             statement.setString(1, codePair.baseCurrencyCode());
@@ -100,8 +100,8 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     @Override
-    public List<ExchangeRateEntity> findAll() {
-        List<ExchangeRateEntity> exchangeRates = new ArrayList<>();
+    public List<ExchangeRate> findAll() {
+        List<ExchangeRate> exchangeRates = new ArrayList<>();
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_QUERY);
              ResultSet result = statement.executeQuery()) {
@@ -115,7 +115,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     }
 
     @Override
-    public void update(ExchangeRateUpdateEntity exchangeRate) {
+    public void update(ExchangeRateUpdate exchangeRate) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_BY_CODES_QUERY)) {
             statement.setBigDecimal(1, exchangeRate.rate());
@@ -150,23 +150,23 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
         }
     }
 
-    private ExchangeRateEntity mapToExchangeRate(ResultSet result) throws SQLException {
-        CurrencyEntity baseCurrencyEntity = new CurrencyEntity(
+    private ExchangeRate mapToExchangeRate(ResultSet result) throws SQLException {
+        Currency baseCurrency = new Currency(
                 result.getLong("base_id"),
                 result.getString("base_name"),
                 result.getString("base_code"),
                 result.getString("base_sign")
         );
-        CurrencyEntity targetCurrencyEntity = new CurrencyEntity(
+        Currency targetCurrency = new Currency(
                 result.getLong("target_id"),
                 result.getString("target_name"),
                 result.getString("target_code"),
                 result.getString("target_sign")
         );
-        return new ExchangeRateEntity(
+        return new ExchangeRate(
                 result.getLong("exchange_id"),
-                baseCurrencyEntity,
-                targetCurrencyEntity,
+                baseCurrency,
+                targetCurrency,
                 result.getBigDecimal("exchange_rate")
         );
     }

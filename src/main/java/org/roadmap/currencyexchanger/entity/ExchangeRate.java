@@ -2,10 +2,10 @@ package org.roadmap.currencyexchanger.entity;
 
 import java.math.BigDecimal;
 
-public record ExchangeRateEntity(
+public record ExchangeRate(
         Long id,
-        CurrencyEntity baseCurrencyEntity,
-        CurrencyEntity targetCurrencyEntity,
+        Currency baseCurrency,
+        Currency targetCurrency,
         BigDecimal rate
 ) {
 }
