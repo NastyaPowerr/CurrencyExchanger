@@ -15,9 +15,19 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public class JdbcCurrencyDao implements CurrencyDao {
-    private static final String SAVE_QUERY = "INSERT INTO currencies(code, full_name, sign) values (?, ?, ?)";
-    private static final String GET_BY_CODE_QUERY = "SELECT * FROM currencies WHERE code = ?";
-    private static final String FIND_ALL_QUERY = "SELECT * FROM currencies";
+    private static final String SAVE_QUERY = """
+            INSERT INTO currencies(code, full_name, sign)
+            VALUES (?, ?, ?)
+            """;
+    private static final String GET_BY_CODE_QUERY = """
+            SELECT id, code, full_name, sign
+            FROM currencies
+            WHERE code = ?
+            """;
+    private static final String FIND_ALL_QUERY = """
+            SELECT id, code, full_name, sign
+            FROM currencies
+            """;
     private static final int CONSTRAINT_UNIQUE_ERROR = 19;
 
     @Override

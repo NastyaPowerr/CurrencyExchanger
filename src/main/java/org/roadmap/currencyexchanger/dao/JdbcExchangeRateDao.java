@@ -37,10 +37,15 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             UPDATE exchangeRates
             SET rate = ?
             WHERE base_currency_id = (SELECT id FROM currencies WHERE code = ?)
-             AND target_currency_id = (SELECT id FROM currencies WHERE code = ?)
+            AND target_currency_id = (SELECT id FROM currencies WHERE code = ?)
             """;
-    private static final String FIND_BY_CURRENCY_CODES = FIND_ALL_QUERY + "WHERE base.code = ? AND target.code = ?";
-    private static final String CURRENCY_EXISTS_QUERY = "SELECT 1 FROM currencies WHERE code = ?";
+    private static final String CURRENCY_EXISTS_QUERY = """
+            SELECT id, code, full_name, sign
+            FROM currencies
+            WHERE code = ?
+            """;
+    private static final String FIND_BY_CURRENCY_CODES =
+            FIND_ALL_QUERY + "WHERE base.code = ? AND target.code = ?";
     private static final int CONSTRAINT_UNIQUE_ERROR = 19;
 
     @Override
