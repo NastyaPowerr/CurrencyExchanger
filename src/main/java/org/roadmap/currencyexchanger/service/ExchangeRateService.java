@@ -32,9 +32,9 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateResponseDto getByCode(CurrencyCodePair codePair) {
-        Optional<ExchangeRate> rateEntityOpt = exchangeRateDao.findByCodes(codePair);
-        if (rateEntityOpt.isPresent()) {
-            return ExchangeRateMapper.INSTANCE.toResponseDto(rateEntityOpt.get());
+        Optional<ExchangeRate> exchangeRate = exchangeRateDao.findByCodes(codePair);
+        if (exchangeRate.isPresent()) {
+            return ExchangeRateMapper.INSTANCE.toResponseDto(exchangeRate.get());
         }
         throw new NoSuchElementException("Exchange rate with code pair %s, %s not found.".formatted(
                 codePair.baseCurrencyCode(), codePair.targetCurrencyCode()

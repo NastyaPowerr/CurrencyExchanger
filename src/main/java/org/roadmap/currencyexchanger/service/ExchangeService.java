@@ -47,9 +47,9 @@ public class ExchangeService {
     }
 
     private Optional<ExchangeRate> findDirect(CurrencyCodePair codePair) {
-        Optional<ExchangeRate> exchangeRateOpt = exchangeRateDao.findByCodes(codePair);
-        if (exchangeRateOpt.isPresent()) {
-            ExchangeRate extractedEntity = exchangeRateOpt.get();
+        Optional<ExchangeRate> exchangeRate = exchangeRateDao.findByCodes(codePair);
+        if (exchangeRate.isPresent()) {
+            ExchangeRate extractedEntity = exchangeRate.get();
             BigDecimal rate = extractedEntity.rate();
             return Optional.of(new ExchangeRate(
                     extractedEntity.id(),
@@ -63,9 +63,9 @@ public class ExchangeService {
 
     private Optional<ExchangeRate> findReverse(CurrencyCodePair codePair) {
         CurrencyCodePair reverseCodePair = new CurrencyCodePair(codePair.targetCurrencyCode(), codePair.baseCurrencyCode());
-        Optional<ExchangeRate> exchangeRateOpt = exchangeRateDao.findByCodes(reverseCodePair);
-        if (exchangeRateOpt.isPresent()) {
-            ExchangeRate extractedEntity = exchangeRateOpt.get();
+        Optional<ExchangeRate> exchangeRate = exchangeRateDao.findByCodes(reverseCodePair);
+        if (exchangeRate.isPresent()) {
+            ExchangeRate extractedEntity = exchangeRate.get();
             BigDecimal rate = BigDecimal.ONE.divide(extractedEntity.rate(), RATE_SCALE, BANK_ROUNDING);
             return Optional.of(new ExchangeRate(
                     extractedEntity.id(),
@@ -80,21 +80,21 @@ public class ExchangeService {
     private Optional<ExchangeRate> findCross(CurrencyCodePair codePair) {
         CurrencyCodePair firstUsdCodePair = new CurrencyCodePair("USD", codePair.baseCurrencyCode());
         CurrencyCodePair secondUsdCodePair = new CurrencyCodePair("USD", codePair.targetCurrencyCode());
-        Optional<ExchangeRate> firstExtractedPairOpt = exchangeRateDao.findByCodes(firstUsdCodePair);
-        Optional<ExchangeRate> secondExtractedPairOpt = exchangeRateDao.findByCodes(secondUsdCodePair);
+        Optional<ExchangeRate> firstExtractedPair = exchangeRateDao.findByCodes(firstUsdCodePair);
+        Optional<ExchangeRate> secondExtractedPair = exchangeRateDao.findByCodes(secondUsdCodePair);
 
-        if (firstExtractedPairOpt.isPresent() && secondExtractedPairOpt.isPresent()) {
-            ExchangeRate firstExtractedPair = firstExtractedPairOpt.get();
-            ExchangeRate secondExtractedPair = secondExtractedPairOpt.get();
-            BigDecimal firstRate = firstExtractedPair.rate();
-            BigDecimal secondRate = secondExtractedPair.rate();
+        if (firstExtractedPair.isPresent() && secondExtractedPair.isPresent()) {
+            ExchangeRate firstExchangeRate = firstExtractedPair.get();
+            ExchangeRate secondExchangeRate = secondExtractedPair.get();
+            BigDecimal firstRate = firstExchangeRate.rate();
+            BigDecimal secondRate = secondExchangeRate.rate();
 
             BigDecimal rate = secondRate.divide(firstRate, RATE_SCALE, BANK_ROUNDING);
 
             return Optional.of(new ExchangeRate(
                     null,
-                    firstExtractedPair.targetCurrency(),
-                    secondExtractedPair.targetCurrency(),
+                    firstExchangeRate.targetCurrency(),
+                    secondExchangeRate.targetCurrency(),
                     rate)
             );
         }
