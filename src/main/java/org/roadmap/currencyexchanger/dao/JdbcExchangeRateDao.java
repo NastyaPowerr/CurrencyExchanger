@@ -66,25 +66,8 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
         } catch (SQLException ex) {
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
                 String errorMessage = ex.getMessage();
-                if (errorMessage.contains("UNIQUE constraint failed")) {
-                    throw new EntityAlreadyExistsException(
-                            String.format(ExceptionMessages.EXCHANGE_RATE_ALREADY_EXISTS,
-                                    exchangeRate.baseCurrency().code(),
-                                    exchangeRate.targetCurrency().code()
-                            ));
-                }
-                if (errorMessage.contains("NOT NULL constraint failed")) {
-                    if (errorMessage.contains("base_currency_id")) {
-                        throw new NoSuchElementException(
-                                String.format(ExceptionMessages.CURRENCY_NOT_FOUND, exchangeRate.baseCurrency().code())
-                        );
-                    }
-                    if (errorMessage.contains("target_currency_id")) {
-                        throw new NoSuchElementException(
-                                String.format(ExceptionMessages.CURRENCY_NOT_FOUND, exchangeRate.targetCurrency().code())
-                        );
-                    }
-                }
+                handleDuplicateExchangeRate(exchangeRate, errorMessage);
+                handleCurrencyMissing(exchangeRate, errorMessage);
             }
             throw new DatabaseException(ExceptionMessages.FAILED_SAVE, ex);
         }
@@ -191,5 +174,30 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
                 targetCurrency,
                 result.getBigDecimal("exchange_rate")
         );
+    }
+
+    private static void handleCurrencyMissing(ExchangeRate exchangeRate, String errorMessage) {
+        if (errorMessage.contains("NOT NULL constraint failed")) {
+            if (errorMessage.contains("base_currency_id")) {
+                throw new NoSuchElementException(
+                        String.format(ExceptionMessages.CURRENCY_NOT_FOUND, exchangeRate.baseCurrency().code())
+                );
+            }
+            if (errorMessage.contains("target_currency_id")) {
+                throw new NoSuchElementException(
+                        String.format(ExceptionMessages.CURRENCY_NOT_FOUND, exchangeRate.targetCurrency().code())
+                );
+            }
+        }
+    }
+
+    private static void handleDuplicateExchangeRate(ExchangeRate exchangeRate, String errorMessage) {
+        if (errorMessage.contains("UNIQUE constraint failed")) {
+            throw new EntityAlreadyExistsException(
+                    String.format(ExceptionMessages.EXCHANGE_RATE_ALREADY_EXISTS,
+                            exchangeRate.baseCurrency().code(),
+                            exchangeRate.targetCurrency().code()
+                    ));
+        }
     }
 }
