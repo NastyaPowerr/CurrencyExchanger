@@ -5,6 +5,7 @@ import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.entity.ExchangeRate;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
+import org.roadmap.currencyexchanger.exception.ExceptionMessages;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -63,10 +64,13 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             checkCurrencyExists(exchangeRate.baseCurrency().code());
             checkCurrencyExists(exchangeRate.targetCurrency().code());
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
-                throw new EntityAlreadyExistsException("Exchange rate with code pair %s, %s already exists.".formatted(
-                        exchangeRate.baseCurrency().code(), exchangeRate.targetCurrency().code()));
+                throw new EntityAlreadyExistsException(
+                        String.format(ExceptionMessages.EXCHANGE_RATE_ALREADY_EXISTS,
+                                exchangeRate.baseCurrency().code(),
+                                exchangeRate.targetCurrency().code()
+                        ));
             }
-            throw new DatabaseException("Failed to save exchange rate.", ex);
+            throw new DatabaseException(ExceptionMessages.FAILED_SAVE, ex);
         }
     }
 
@@ -86,8 +90,11 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             checkCurrencyExists(codePair.baseCurrencyCode());
             checkCurrencyExists(codePair.targetCurrencyCode());
             throw new DatabaseException(
-                    "Failed to fetch exchange rate with code pair %s, %s."
-                            .formatted(codePair.baseCurrencyCode(), codePair.targetCurrencyCode()),
+                    String.format(
+                            ExceptionMessages.FAILED_FETCH_EXCHANGE_RATE,
+                            codePair.baseCurrencyCode(),
+                            codePair.targetCurrencyCode()
+                    ),
                     ex
             );
         }
@@ -104,7 +111,7 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
                 exchangeRates.add(mapToExchangeRate(result));
             }
         } catch (SQLException ex) {
-            throw new DatabaseException("Failed to fetch all exchange rates." + ex);
+            throw new DatabaseException(ExceptionMessages.FAILED_FETCH_EXCHANGE_RATES, ex);
         }
         return exchangeRates;
     }
@@ -121,9 +128,12 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
             if (rowsUpdated == 0) {
                 checkCurrencyExists(exchangeRate.baseCurrency().code());
                 checkCurrencyExists(exchangeRate.targetCurrency().code());
-                throw new NoSuchElementException("Exchange rate with pair code %s, %s not found.".formatted(
-                        exchangeRate.baseCurrency().code(), exchangeRate.targetCurrency().code())
-                );
+                throw new NoSuchElementException(
+                        String.format(
+                                ExceptionMessages.EXCHANGE_RATE_NOT_FOUND,
+                                exchangeRate.baseCurrency().code(),
+                                exchangeRate.targetCurrency().code()
+                        ));
             }
         } catch (SQLException ex) {
             throw new DatabaseException("Failed to update exchange rate." + ex);
@@ -137,7 +147,8 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
 
             try (ResultSet result = statement.executeQuery()) {
                 if (!result.next()) {
-                    throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
+                    throw new NoSuchElementException(
+                            String.format(ExceptionMessages.CURRENCY_NOT_FOUND, code));
                 }
             }
         } catch (SQLException ex) {

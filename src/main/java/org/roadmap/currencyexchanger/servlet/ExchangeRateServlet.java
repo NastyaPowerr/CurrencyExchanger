@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
 import org.roadmap.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
+import org.roadmap.currencyexchanger.exception.ExceptionMessages;
 import org.roadmap.currencyexchanger.exception.ValidationException;
 import org.roadmap.currencyexchanger.service.ExchangeRateService;
 import org.roadmap.currencyexchanger.util.ExchangeRateValidatorUtil;
@@ -46,7 +47,7 @@ public class ExchangeRateServlet extends HttpServlet {
         CurrencyCodePair codePair = extractAndValidateCodePair(req);
         String rateString = req.getReader().readLine();
         if (rateString == null) {
-            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_RATE_MESSAGE);
+            throw new ValidationException(ExceptionMessages.MISSING_EXCHANGE_RATE);
         }
         rateString = rateString.replace("rate=", "");
 
@@ -58,11 +59,11 @@ public class ExchangeRateServlet extends HttpServlet {
     private static CurrencyCodePair extractAndValidateCodePair(HttpServletRequest req) {
         String path = req.getPathInfo();
         if (path == null || path.equals("/")) {
-            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_CODE_PAIR_MESSAGE);
+            throw new ValidationException(ExceptionMessages.MISSING_CODE_PAIR);
         }
         String inputCodePair = path.substring(1);
         if (inputCodePair.length() != 6) {
-            throw new ValidationException(ExchangeRateValidatorUtil.MISSING_CODE_PAIR_MESSAGE);
+            throw new ValidationException(ExceptionMessages.MISSING_CODE_PAIR);
         }
         String baseCurrencyCode = inputCodePair.substring(0, 3);
         String targetCurrencyCode = inputCodePair.substring(3);

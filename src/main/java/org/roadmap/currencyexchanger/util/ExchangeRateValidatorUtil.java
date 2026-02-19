@@ -1,59 +1,59 @@
 package org.roadmap.currencyexchanger.util;
 
-import org.roadmap.currencyexchanger.exception.ValidationException;
 import org.roadmap.currencyexchanger.dto.CurrencyCodePair;
+import org.roadmap.currencyexchanger.exception.ExceptionMessages;
+import org.roadmap.currencyexchanger.exception.ValidationException;
 
 import java.math.BigDecimal;
 
 public final class ExchangeRateValidatorUtil {
-    private static final String MISSING_AMOUNT_MESSAGE = "Amount is required.";
     private static final BigDecimal MIN_RATE = BigDecimal.valueOf(0.00001).stripTrailingZeros();
     private static final BigDecimal MIN_AMOUNT = BigDecimal.ZERO;
     private static final BigDecimal MAX_EXCHANGE_RATE = BigDecimal.valueOf(2000000);
     private static final BigDecimal MAX_AMOUNT = BigDecimal.valueOf(1000000000);
-    private static final String INVALID_AMOUNT_MESSAGE =
-            "Amount cannot be lesser than %s.".formatted(MIN_AMOUNT);
-    public static final String MISSING_RATE_MESSAGE = "Exchange rate is required.";
-    public static final String INVALID_RATE_MESSAGE =
-            "Exchange rate cannot be lesser than %s.".formatted(MIN_RATE);
-    public static final String INVALID_STRING_RATE_MESSAGE =
-            "Exchange rate must be a number and cannot be lesser than %s.".formatted(MIN_RATE);
-    public static final String INVALID_STRING_AMOUNT_MESSAGE =
-            "Exchange amount must be a number and cannot be lesser than %s.".formatted(MIN_RATE);
-    private static final String SAME_CURRENCY_MESSAGE = "Cannot exchange currency to itself.";
-    private static final String EXCHANGE_OUT_OF_RANGE = "Exchange rate should be lesser than %s.".formatted(MAX_EXCHANGE_RATE);
-    private static final String AMOUNT_OUT_OF_RANGE = "Amount should be lesser than %s.".formatted(MAX_AMOUNT);
-    public static final String MISSING_CODE_PAIR_MESSAGE = "Code pair is required. Expected 6 characters (two 3-letter codes).";
 
     private ExchangeRateValidatorUtil() {
     }
 
     public static void validateRate(String rate) {
-        validateStringToBigDecimal(rate, MISSING_RATE_MESSAGE, MIN_RATE, INVALID_RATE_MESSAGE, INVALID_STRING_RATE_MESSAGE);
+        validateStringToBigDecimal(
+                rate,
+                ExceptionMessages.MISSING_EXCHANGE_RATE,
+                MIN_RATE,
+                String.format(ExceptionMessages.INVALID_EXCHANGE_RATE_NUMBER, MIN_RATE),
+                String.format(ExceptionMessages.INVALID_EXCHANGE_RATE_STRING, MIN_RATE)
+        );
         if (new BigDecimal(rate).compareTo(MAX_EXCHANGE_RATE) > 0) {
-            throw new ValidationException(EXCHANGE_OUT_OF_RANGE);
+            throw new ValidationException(ExceptionMessages.EXCHANGE_OUT_OF_RANGE);
         }
     }
 
     public static void validateAmount(String amount) {
-        validateStringToBigDecimal(amount, MISSING_AMOUNT_MESSAGE, MIN_AMOUNT, INVALID_AMOUNT_MESSAGE, INVALID_STRING_AMOUNT_MESSAGE);
+        validateStringToBigDecimal(
+                amount,
+                ExceptionMessages.MISSING_EXCHANGE_AMOUNT,
+                MIN_AMOUNT,
+                String.format(ExceptionMessages.INVALID_EXCHANGE_AMOUNT_MIN, MIN_AMOUNT),
+                String.format(ExceptionMessages.INVALID_EXCHANGE_AMOUNT_STRING, MIN_AMOUNT)
+        );
         if (new BigDecimal(amount).compareTo(MAX_AMOUNT) > 0) {
-            throw new ValidationException(AMOUNT_OUT_OF_RANGE);
+            throw new ValidationException(
+                    String.format(ExceptionMessages.INVALID_EXCHANGE_AMOUNT_MAX, MAX_AMOUNT));
         }
     }
 
     public static void validateCodePair(CurrencyCodePair codePair) {
         if (codePair == null) {
-            throw new ValidationException(MISSING_CODE_PAIR_MESSAGE);
+            throw new ValidationException(ExceptionMessages.MISSING_CODE_PAIR);
         }
         try {
             CurrencyValidatorUtil.validateCode(codePair.baseCurrencyCode());
             CurrencyValidatorUtil.validateCode(codePair.targetCurrencyCode());
         } catch (ValidationException ex) {
-            throw new ValidationException(MISSING_CODE_PAIR_MESSAGE);
+            throw new ValidationException(ExceptionMessages.MISSING_CODE_PAIR);
         }
         if (codePair.baseCurrencyCode().equals(codePair.targetCurrencyCode())) {
-            throw new ValidationException(SAME_CURRENCY_MESSAGE);
+            throw new ValidationException(ExceptionMessages.SAME_CURRENCY);
         }
     }
 

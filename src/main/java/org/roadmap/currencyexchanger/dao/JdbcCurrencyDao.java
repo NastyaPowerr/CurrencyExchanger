@@ -3,6 +3,7 @@ package org.roadmap.currencyexchanger.dao;
 import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.exception.EntityAlreadyExistsException;
+import org.roadmap.currencyexchanger.exception.ExceptionMessages;
 import org.roadmap.currencyexchanger.util.ConnectionManagerUtil;
 
 import java.sql.Connection;
@@ -44,13 +45,15 @@ public class JdbcCurrencyDao implements CurrencyDao {
                     Long id = generatedKeys.getLong(1);
                     return new Currency(id, currency.name(), currency.code(), currency.sign());
                 }
-                throw new DatabaseException("Failed to fetch generated id after save operation.");
+                throw new DatabaseException(ExceptionMessages.FAILED_FETCH_ID_AFTER_SAVE);
             }
         } catch (SQLException ex) {
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
-                throw new EntityAlreadyExistsException("Currency with code %s already exists.".formatted(currency.code()));
+                throw new EntityAlreadyExistsException(
+                        String.format(ExceptionMessages.CURRENCY_ALREADY_EXISTS, currency.code())
+                );
             }
-            throw new DatabaseException("Failed during save operation.", ex);
+            throw new DatabaseException(ExceptionMessages.FAILED_SAVE, ex);
         }
     }
 
@@ -66,9 +69,13 @@ public class JdbcCurrencyDao implements CurrencyDao {
                 }
             }
         } catch (SQLException ex) {
-            throw new DatabaseException("Failed to fetch currency by code %s.".formatted(code), ex);
+            throw new DatabaseException(
+                    String.format(ExceptionMessages.FAILED_FETCH_CURRENCY_BY_CODE, code), ex
+            );
         }
-        throw new NoSuchElementException("Currency with code %s not found.".formatted(code));
+        throw new NoSuchElementException(
+                String.format(ExceptionMessages.CURRENCY_NOT_FOUND, code)
+        );
     }
 
     @Override
@@ -82,7 +89,7 @@ public class JdbcCurrencyDao implements CurrencyDao {
             }
             return currencies;
         } catch (SQLException ex) {
-            throw new DatabaseException("Failed to fetch all currencies.", ex);
+            throw new DatabaseException(ExceptionMessages.FAILED_FETCH_CURRENCIES, ex);
         }
     }
 
