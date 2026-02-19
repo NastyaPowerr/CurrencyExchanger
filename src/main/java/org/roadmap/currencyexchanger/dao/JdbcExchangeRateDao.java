@@ -12,7 +12,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -53,25 +52,17 @@ public class JdbcExchangeRateDao implements ExchangeRateDao {
     @Override
     public ExchangeRate save(ExchangeRate exchangeRate) {
         try (Connection connection = ConnectionManagerUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement statement = connection.prepareStatement(SAVE_WITH_CODES_QUERY)) {
             statement.setString(1, exchangeRate.baseCurrency().code());
             statement.setString(2, exchangeRate.targetCurrency().code());
             statement.setBigDecimal(3, exchangeRate.rate());
 
             statement.executeUpdate();
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    Long id = generatedKeys.getLong(1);
-                    return new ExchangeRate(
-                            id,
-                            exchangeRate.baseCurrency(),
-                            exchangeRate.targetCurrency(),
-                            exchangeRate.rate()
-                    );
-                }
-                throw new DatabaseException(ExceptionMessages.FAILED_FETCH_ID_AFTER_SAVE);
-            }
+            return findByCodes(new CurrencyCodePair(
+                    exchangeRate.baseCurrency().code(),
+                    exchangeRate.targetCurrency().code()
+            )).orElseThrow(() -> new DatabaseException("Saved but not found"));
         } catch (SQLException ex) {
             if (ex.getErrorCode() == CONSTRAINT_UNIQUE_ERROR) {
                 String errorMessage = ex.getMessage();

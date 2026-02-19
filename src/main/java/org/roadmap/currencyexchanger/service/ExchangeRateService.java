@@ -6,7 +6,6 @@ import org.roadmap.currencyexchanger.dto.request.ExchangeRateRequestDto;
 import org.roadmap.currencyexchanger.dto.response.ExchangeRateResponseDto;
 import org.roadmap.currencyexchanger.entity.Currency;
 import org.roadmap.currencyexchanger.entity.ExchangeRate;
-import org.roadmap.currencyexchanger.exception.DatabaseException;
 import org.roadmap.currencyexchanger.mapper.ExchangeRateMapper;
 
 import java.util.ArrayList;
@@ -28,15 +27,8 @@ public class ExchangeRateService {
                 new Currency(null, null, exchangeRate.targetCurrencyCode(), null),
                 exchangeRate.rate()
         );
-        exchangeRateDao.save(entity);
-        Optional<ExchangeRate> savedEntity = exchangeRateDao.findByCodes(new CurrencyCodePair(
-                exchangeRate.baseCurrencyCode(),
-                exchangeRate.targetCurrencyCode()
-        ));
-        if (savedEntity.isPresent()) {
-            return ExchangeRateMapper.INSTANCE.toResponseDto(savedEntity.get());
-        }
-        throw new DatabaseException("Race condition occurred. Try again.");
+        ExchangeRate savedEntity = exchangeRateDao.save(entity);
+        return ExchangeRateMapper.INSTANCE.toResponseDto(savedEntity);
     }
 
     public ExchangeRateResponseDto getByCode(CurrencyCodePair codePair) {
